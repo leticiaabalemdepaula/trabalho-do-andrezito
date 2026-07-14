@@ -29,6 +29,29 @@
 </div>
 
 <script src="script.js"></script>
+<script src="Main.js"></script>
 
+    <script>
+        // Mostra o console dentro da página
+        const saida = document.getElementById("saida");
+
+        const logOriginal = console.log;
+
+        console.log = function (...mensagens) {
+            logOriginal(...mensagens);
+
+            saida.innerHTML += mensagens.join(" ") + "<br>";
+            saida.scrollTop = saida.scrollHeight;
+        };
+
+        // Botão iniciar
+        document.getElementById("btnIniciar").addEventListener("click", function () {
+
+            this.disabled = true;
+
+            main();
+
+        });
+    </script>
 </body>
 </html>
