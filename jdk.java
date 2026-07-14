@@ -626,7 +626,70 @@ function main() {
 
     console.log("\nFim do jogo!");
 
-}
+}// ==========================
+// FASE 1 - Floresta Sombria
+// ==========================
 
+function fase1(jogador) {
+
+    console.log("==================================");
+    console.log("        FASE 1");
+    console.log("     FLORESTA SOMBRIA");
+    console.log("==================================");
+
+    console.log(
+        `${jogador.nome} entrou na Floresta Sombria em busca de monstros.`
+    );
+
+    const slime = new Monstro(
+        "Slime",
+        30,
+        5,
+        2,
+        30,
+        10
+    );
+
+    console.log("\n⚔ Um Slime apareceu!");
+
+    while (jogador.estaVivo() && slime.estaVivo()) {
+
+        jogador.atacar(slime);
+
+        if (slime.estaVivo()) {
+            slime.atacar(jogador);
+        }
+
+    }
+
+    if (jogador.estaVivo()) {
+
+        console.log("\n🏆 Você venceu a batalha!");
+
+        const missao = new Missao(
+            "Eliminar o Slime",
+            slime.getXpRecompensa(),
+            slime.getOuroRecompensa()
+        );
+
+        missao.concluir(jogador);
+
+        jogador.mostrarStatus();
+
+    } else {
+
+        console.log("\n💀 GAME OVER");
+
+    }
+
+}
+const jogador = new Guerreiro("Arthur");
+
+const espada = new Arma("Espada de Ferro", 8, 50);
+
+jogador.adicionarArma(espada);
+jogador.equiparArma(espada);
+
+fase1(jogador);
 // Executa o jogo
 main();
