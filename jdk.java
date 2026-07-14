@@ -690,11 +690,8 @@ const espada = new Arma("Espada de Ferro", 8, 50);
 jogador.adicionarArma(espada);
 jogador.equiparArma(espada);
 
-fase1(jogador);
-// Executa o jogo
 const botao = document.getElementById("btnIniciar");
 
 botao.addEventListener("click", () => {
-    botao.disabled = true;
     main();
 });
