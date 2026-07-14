@@ -692,4 +692,9 @@ jogador.equiparArma(espada);
 
 fase1(jogador);
 // Executa o jogo
-main();
+const botao = document.getElementById("btnIniciar");
+
+botao.addEventListener("click", () => {
+    botao.disabled = true;
+    main();
+});
