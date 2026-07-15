@@ -637,18 +637,9 @@ function fase1(jogador) {
     console.log("     FLORESTA SOMBRIA");
     console.log("==================================");
 
-    console.log(
-        `${jogador.nome} entrou na Floresta Sombria em busca de monstros.`
-    );
+    console.log(`${jogador.nome} entrou na Floresta Sombria em busca de monstros.`);
 
-    const slime = new Monstro(
-        "Slime",
-        30,
-        5,
-        2,
-        30,
-        10
-    );
+    const slime = new Monstro("Slime", 30, 5, 2, 30, 10);
 
     console.log("\n⚔ Um Slime apareceu!");
 
@@ -673,7 +664,6 @@ function fase1(jogador) {
         );
 
         missao.concluir(jogador);
-
         jogador.mostrarStatus();
 
     } else {
@@ -681,17 +671,25 @@ function fase1(jogador) {
         console.log("\n💀 GAME OVER");
 
     }
-
 }
-const jogador = new Guerreiro("Arthur");
 
-const espada = new Arma("Espada de Ferro", 8, 50);
+// ==========================
+// BOTÃO INICIAR
+// ==========================
 
-jogador.adicionarArma(espada);
-jogador.equiparArma(espada);
+const botao = document.getElementById("iniciar");
 
-const botao = document.getElementById("btnIniciar");
+botao.addEventListener("click", function () {
 
-botao.addEventListener("click", () => {
-    main();
+    this.disabled = true;
+
+    const jogador = new Guerreiro("Arthur");
+
+    const espada = new Arma("Espada de Ferro", 8, 50);
+
+    jogador.adicionarArma(espada);
+    jogador.equiparArma(espada);
+
+    fase1(jogador);
+main();
 });
