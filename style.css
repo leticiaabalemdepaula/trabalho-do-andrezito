@@ -2,90 +2,181 @@
     margin:0;
     padding:0;
     box-sizing:border-box;
+    font-family:Arial, Helvetica, sans-serif;
 }
 
 body{
-    font-family:Segoe UI,Arial,sans-serif;
-    background:linear-gradient(135deg,#0f172a,#1e293b,#020617);
-    color:#fff;
-    display:flex;
-    justify-content:center;
-    align-items:center;
-    min-height:100vh;
+
+    background:url("img/fundo.jpg") no-repeat center center fixed;
+    background-size:cover;
+
+    color:white;
+
+    text-align:center;
+
 }
 
 .container{
+
     width:90%;
-    max-width:900px;
-    background:rgba(20,20,30,.92);
-    border:2px solid #facc15;
-    border-radius:18px;
+    max-width:1100px;
+
+    margin:30px auto;
+
+    background:rgba(0,0,0,.75);
+
+    border-radius:15px;
+
     padding:30px;
-    box-shadow:0 0 30px rgba(250,204,21,.3);
+
+    box-shadow:0 0 20px black;
+
 }
 
 h1{
+
+    font-size:45px;
+
+    color:gold;
+
+    margin-bottom:30px;
+
+}
+
+h2{
+
+    margin:20px;
+
+}
+
+input{
+
+    width:300px;
+
+    padding:12px;
+
+    border:none;
+
+    border-radius:8px;
+
     text-align:center;
-    font-size:40px;
-    color:#facc15;
-    margin-bottom:20px;
-    text-shadow:0 0 15px gold;
+
+    font-size:18px;
+
+}
+
+.classes{
+
+    display:flex;
+
+    justify-content:center;
+
+    gap:40px;
+
+    flex-wrap:wrap;
+
+    margin-top:30px;
+
+}
+
+.classe{
+
+    width:220px;
+
+    background:#222;
+
+    border:4px solid gray;
+
+    border-radius:15px;
+
+    cursor:pointer;
+
+    transition:.3s;
+
+    padding:15px;
+
+}
+
+.classe:hover{
+
+    transform:scale(1.05);
+
+    border-color:gold;
+
+}
+
+.classe img{
+
+    width:180px;
+
+    height:220px;
+
+    object-fit:cover;
+
+    border-radius:10px;
+
+}
+
+.classe h3{
+
+    margin-top:10px;
+
+}
+
+.selecionada{
+
+    border:4px solid lime;
+
+    box-shadow:0 0 20px lime;
+
 }
 
 button{
-    width:100%;
-    padding:15px;
-    margin:15px 0;
-    font-size:18px;
-    font-weight:bold;
+
+    margin-top:30px;
+
+    padding:15px 35px;
+
+    font-size:22px;
+
     border:none;
+
     border-radius:10px;
-    background:linear-gradient(90deg,#f59e0b,#facc15);
-    color:#111;
+
     cursor:pointer;
-    transition:.3s;
+
+    background:gold;
+
+    color:black;
+
+    font-weight:bold;
+
 }
 
 button:hover{
-    transform:scale(1.05);
-    box-shadow:0 0 20px gold;
+
+    background:orange;
+
 }
 
 #saida{
-    background:#111827;
-    border:1px solid #374151;
-    border-radius:10px;
+
+    margin-top:30px;
+
+    text-align:left;
+
+    background:black;
+
+    color:#00ff00;
+
     padding:20px;
-    min-height:450px;
+
+    border-radius:10px;
+
+    min-height:300px;
+
     overflow-y:auto;
-    white-space:pre-wrap;
-    font-family:Consolas,monospace;
-    line-height:1.6;
-}
 
-.vida{
-    color:#22c55e;
-    font-weight:bold;
-}
+    font-family:Consolas;
 
-.dano{
-    color:#ef4444;
-    font-weight:bold;
-}
-
-.critico{
-    color:#facc15;
-    font-weight:bold;
-}
-
-.vitoria{
-    color:#38bdf8;
-    font-size:20px;
-    font-weight:bold;
-}
-
-.derrota{
-    color:#dc2626;
-    font-size:20px;
-    font-weight:bold;
 }
