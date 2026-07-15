@@ -1,193 +1,423 @@
-```html
 <!DOCTYPE html>
 <html lang="pt-BR">
-
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>RPG Medieval</title>
+    <title>RPG de Turno</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #1a1a1a;
+            color: #f0f0f0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 20px;
+            margin: 0;
+        }
 
-    <link rel="stylesheet" href="style.css">
+        h1 {
+            color: #ffcc00;
+            text-shadow: 2px 2px 4px #000;
+        }
+
+        .container {
+            background-color: #2a2a2a;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.5);
+            width: 90%;
+            max-width: 600px;
+            text-align: center;
+        }
+
+        .input-group {
+            margin: 15px 0;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+        }
+
+        input, select, button {
+            padding: 10px;
+            border-radius: 5px;
+            border: none;
+            font-size: 16px;
+        }
+
+        input, select {
+            width: 80%;
+            background-color: #3e3e3e;
+            color: white;
+            margin-bottom: 10px;
+        }
+
+        button {
+            background-color: #ffcc00;
+            color: #111;
+            font-weight: bold;
+            cursor: pointer;
+            transition: transform 0.1s, background-color 0.2s;
+            margin: 5px;
+        }
+
+        button:hover {
+            background-color: #e6b800;
+        }
+
+        button:active {
+            transform: scale(0.95);
+        }
+
+        /* Classes de Animação de Dano */
+        .damage-blink {
+            animation: blink 0.15s double;
+            border: 2px solid red !important;
+        }
+
+        @keyframes blink {
+            0% { opacity: 1; background-color: #2a2a2a; }
+            50% { opacity: 0.3; background-color: red; }
+            100% { opacity: 1; background-color: #2a2a2a; }
+        }
+
+        /* Painéis de Jogo */
+        .hidden {
+            display: none !important;
+        }
+
+        .battle-arena {
+            display: flex;
+            justify-content: space-around;
+            margin: 20px 0;
+        }
+
+        .char-card {
+            background-color: #333;
+            padding: 15px;
+            border-radius: 8px;
+            width: 45%;
+            border: 2px solid #555;
+            transition: all 0.3s ease;
+        }
+
+        .hp-bar-container {
+            background-color: #555;
+            border-radius: 5px;
+            overflow: hidden;
+            margin-top: 10px;
+        }
+
+        .hp-bar {
+            height: 15px;
+            background-color: #28a745;
+            width: 100%;
+            transition: width 0.3s ease;
+        }
+
+        .log-box {
+            background-color: #111;
+            border: 1px solid #444;
+            padding: 10px;
+            height: 100px;
+            overflow-y: auto;
+            border-radius: 5px;
+            font-family: monospace;
+            text-align: left;
+            margin: 15px 0;
+            font-size: 14px;
+        }
+
+        .shop-section {
+            border-top: 2px dashed #555;
+            padding-top: 15px;
+            margin-top: 15px;
+        }
+    </style>
 </head>
-
 <body>
 
-<div class="container">
+    <h1>Mini RPG de Turno</h1>
 
-    <h1>RPG Medieval</h1>
+    <div class="container">
+        
+        <div id="setup-screen">
+            <h3>Crie seu Herói</h3>
+            <div class="input-group">
+                <label for="char-name">Nome do Personagem:</label>
+                <input type="text" id="char-name" value="Heroi Anonimo" placeholder="Digite o nome...">
+            </div>
+            <div class="input-group">
+                <label for="char-class">Escolha sua Classe:</label>
+                <select id="char-class">
+                    <option value="Guerreiro">Guerreiro (Foco em Defesa e Vida)</option>
+                    <option value="Mago">Mago (Foco em Alto Dano)</option>
+                    <option value="Arqueiro">Arqueiro (Foco em Ataques Rápidos)</option>
+                </select>
+            </div>
+            <button onclick="iniciarJogo()">Começar Jogo</button>
+        </div>
 
-    <!-- MENU -->
-    <div id="menu">
+        <div id="game-screen" class="hidden">
+            
+            <div class="battle-arena">
+                <div id="player-card" class="char-card">
+                    <h3 id="display-name">Nome</h3>
+                    <p id="display-class" style="color: #ffcc00; font-weight: bold;">Classe</p>
+                    <p>Ouro: <span id="display-gold" style="color: gold;">100</span>g</p>
+                    <p>Dano: <span id="display-damage">10</span></p>
+                    <div>HP: <span id="player-hp-text">100/100</span></div>
+                    <div class="hp-bar-container">
+                        <div id="player-hp-bar" class="hp-bar"></div>
+                    </div>
+                </div>
 
-        <h2>Crie seu Herói</h2>
-
-        <label>Nome do Herói</label><br>
-        <input type="text" id="nome" placeholder="Digite o nome"><br><br>
-
-        <h2>Escolha sua Classe</h2>
-
-        <div class="classes">
-
-            <div class="classe" onclick="selecionarClasse('Guerreiro', this)">
-                <img src="guerreiro.jpeg" alt="Guerreiro">
-                <h3>Guerreiro</h3>
+                <div id="enemy-card" class="char-card">
+                    <h3 id="enemy-name">Lobo Selvagem</h3>
+                    <p style="color: #ff4444; font-weight: bold;">Monstro</p>
+                    <p id="enemy-desc">Um inimigo faminto espreita.</p>
+                    <p>Dano: <span id="enemy-damage-text">8</span></p>
+                    <div>HP: <span id="enemy-hp-text">50/50</span></div>
+                    <div class="hp-bar-container">
+                        <div id="enemy-hp-bar" class="hp-bar" style="background-color: #dc3545;"></div>
+                    </div>
+                </div>
             </div>
 
-            <div class="classe" onclick="selecionarClasse('Mago', this)">
-                <img src="mago.jpeg" alt="Mago">
-                <h3>Mago</h3>
+            <div id="combat-log" class="log-box">
+                O combate está prestes a começar!
             </div>
 
-            <div class="classe" onclick="selecionarClasse('Arqueiro', this)">
-                <img src="arqueiro.jpeg" alt="Arqueiro">
-                <h3>Arqueiro</h3>
+            <div id="action-buttons">
+                <button onclick="atacar()">Atacar!</button>
+                <button id="next-enemy-btn" class="hidden" onclick="proximoInimigo()" style="background-color: #28a745; color: white;">Buscar Outro Inimigo</button>
+            </div>
+
+            <div class="shop-section">
+                <h3>Mercado Local</h3>
+                <p>Compre melhorias específicas para sua classe:</p>
+                <div id="shop-items">
+                    </div>
             </div>
 
         </div>
-
-        <br>
-
-        <button id="iniciar">▶ Começar Aventura</button>
 
     </div>
 
-    <hr>
-
-    <!-- ÁREA DO JOGO -->
-    <div id="jogo" style="display:none;">
-
-        <div id="personagem">
-
-            <img id="imgJogador" src="" width="220">
-
-            <div class="barra">
-                <div id="vidaJogador"></div>
-            </div>
-
-        </div>
-
-        <div id="monstro">
-
-            <img id="imgMonstro" src="" width="180">
-
-            <div class="barra">
-                <div id="vidaMonstro"></div>
-            </div>
-
-        </div>
-
-    </div>
-
-    <br>
-
-  
-<div id="status-jogador"></div>
-<div id="status-monstro"></div>
-<div id="historico-combate"></div>
-
-
-<button id="btn-atacar">Atacar</button>
-<button id="btn-especial">Ataque Especial</button>
-<button id="btn-comprar-arma">Comprar Espada Curta</button>
-
-    <br>
-
-    <div id="saida"></div>
-
-</div>
-
-<script src="jdk.js"></script>
-
-<script>
-
-const saida = document.getElementById("saida");
-
-const logOriginal = console.log;
-
-console.log = function(...mensagens){
-
-    logOriginal(...mensagens);
-
-    saida.innerHTML += mensagens.join(" ") + "<br>";
-
-    saida.scrollTop = saida.scrollHeight;
-
-}
-
-let classeEscolhida = "";
-
-function selecionarClasse(classe, elemento){
-
-    classeEscolhida = classe;
-
-    document.querySelectorAll(".classe").forEach(c=>{
-
-        c.classList.remove("selecionada");
-
-    });
-
-    elemento.classList.add("selecionada");
-
-}
-
-document.getElementById("iniciar").addEventListener("click",function(){
-
-    const nome=document.getElementById("nome").value.trim();
-
-    if(nome==""){
-
-        alert("Digite o nome do personagem.");
-
-        return;
-
-    }
-
-    if(classeEscolhida==""){
-
-        alert("Escolha uma classe.");
-
-        return;
-
-    }
-
-    let jogador;
-
-    if(classeEscolhida=="Guerreiro"){
-
-        jogador=new Guerreiro(nome);
-
-    }
-
-    else if(classeEscolhida=="Mago"){
-
-        jogador=new Mago(nome);
-
-    }
-
-    else{
-
-        jogador=new Arqueiro(nome);
-
-    }
-
-    const espada=new Arma("Espada de Ferro",8,50);
-
-    jogador.adicionarArma(espada);
-
-    jogador.equiparArma(espada);
-
-    document.getElementById("menu").style.display="none";
-
-    document.getElementById("jogo").style.display="flex";
-
-    document.getElementById("botoesJogo").style.display="block";
-
-    fase1(jogador);
-
-});
-
-</script>
-
+    <script>
+        // --- ESTADO DO JOGO ---
+        let player = {
+            nome: "",
+            classe: "",
+            hp: 100,
+            maxHp: 100,
+            dano: 10,
+            ouro: 100
+        };
+
+        let enemy = {
+            nome: "Lobo Selvagem",
+            hp: 50,
+            maxHp: 50,
+            dano: 8,
+            recompensaOuro: 40
+        };
+
+        // Banco de dados de inimigos para quando derrotar um
+        const listaInimigos = [
+            { nome: "Lobo Selvagem", hp: 50, maxHp: 50, dano: 8, recompensaOuro: 40 },
+            { nome: "Orc Saqueador", hp: 80, maxHp: 80, dano: 12, recompensaOuro: 70 },
+            { nome: "Esqueleto Arqueiro", hp: 60, maxHp: 60, dano: 15, recompensaOuro: 65 },
+            { nome: "Dragão Jovem", hp: 150, maxHp: 150, dano: 22, recompensaOuro: 150 }
+        ];
+
+        // --- INICIALIZAÇÃO ---
+        function iniciarJogo() {
+            // Captura os dados do formulário
+            player.nome = document.getElementById("char-name").value || "Herói Anonimo";
+            player.classe = document.getElementById("char-class").value;
+
+            // Define status iniciais com base na classe
+            if (player.classe === "Guerreiro") {
+                player.maxHp = 130;
+                player.dano = 12;
+            } else if (player.classe === "Mago") {
+                player.maxHp = 80;
+                player.dano = 22;
+            } else if (player.classe === "Arqueiro") {
+                player.maxHp = 100;
+                player.dano = 16;
+            }
+            player.hp = player.maxHp;
+
+            // Atualiza o HTML com as informações do personagem criado
+            document.getElementById("display-name").innerText = player.nome;
+            document.getElementById("display-class").innerText = player.classe;
+            
+            atualizarStatusInterface();
+            atualizarLoja();
+
+            // Esconde a tela de criação e mostra a tela do jogo
+            document.getElementById("setup-screen").classList.add("hidden");
+            document.getElementById("game-screen").classList.remove("hidden");
+
+            logar(`O ${player.classe} ${player.nome} entrou na masmorra!`);
+        }
+
+        // --- ATUALIZADORES DE INTERFACE ---
+        function atualizarStatusInterface() {
+            // Player
+            document.getElementById("display-gold").innerText = player.ouro;
+            document.getElementById("display-damage").innerText = player.dano;
+            document.getElementById("player-hp-text").innerText = `${player.hp}/${player.maxHp}`;
+            const playerHpPercent = Math.max(0, (player.hp / player.maxHp) * 100);
+            document.getElementById("player-hp-bar").style.width = `${playerHpPercent}%`;
+
+            // Enemy
+            document.getElementById("enemy-name").innerText = enemy.nome;
+            document.getElementById("enemy-damage-text").innerText = enemy.dano;
+            document.getElementById("enemy-hp-text").innerText = `${enemy.hp}/${enemy.maxHp}`;
+            const enemyHpPercent = Math.max(0, (enemy.hp / enemy.maxHp) * 100);
+            document.getElementById("enemy-hp-bar").style.width = `${enemyHpPercent}%`;
+        }
+
+        function logar(texto) {
+            const logBox = document.getElementById("combat-log");
+            logBox.innerHTML += `<br>> ${texto}`;
+            logBox.scrollTop = logBox.scrollHeight; // Rola o log automaticamente para baixo
+        }
+
+        // --- SISTEMA DE LOJA DINÂMICA ---
+        function atualizarLoja() {
+            const shopDiv = document.getElementById("shop-items");
+            shopDiv.innerHTML = ""; // Limpa a loja anterior
+
+            let itensDisponiveis = [];
+
+            // Define os itens baseados na classe escolhida
+            if (player.classe === "Guerreiro") {
+                itensDisponiveis = [
+                    { nome: "Escudo de Ferro (+30 HP)", custo: 40, tipo: "hp", valor: 30 },
+                    { nome: "Espada Pesada (+5 Dano)", custo: 50, tipo: "dano", valor: 5 }
+                ];
+            } else if (player.classe === "Mago") {
+                itensDisponiveis = [
+                    { nome: "Cajado Arcano (+12 Dano)", custo: 60, tipo: "dano", valor: 12 },
+                    { nome: "Pocão de Mana Máxima (+15 HP)", custo: 30, tipo: "hp", valor: 15 }
+                ];
+            } else if (player.classe === "Arqueiro") {
+                itensDisponiveis = [
+                    { nome: "Arco Composto (+8 Dano)", custo: 50, tipo: "dano", valor: 8 },
+                    { nome: "Botas de Couro Rapido (+20 HP)", custo: 35, tipo: "hp", valor: 20 }
+                ];
+            }
+
+            // Renderiza os botões de compra na tela
+            itensDisponiveis.forEach(item => {
+                const btn = document.createElement("button");
+                btn.innerText = `${item.nome} - Preço: ${item.custo}g`;
+                btn.onclick = () => comprarItem(item);
+                shopDiv.appendChild(btn);
+            });
+        }
+
+        function comprarItem(item) {
+            if (player.ouro >= item.custo) {
+                player.ouro -= item.custo;
+                if (item.tipo === "hp") {
+                    player.maxHp += item.valor;
+                    player.hp += item.valor; // cura a quantia extra recebida
+                } else if (item.tipo === "dano") {
+                    player.dano += item.valor;
+                }
+                logar(`Você comprou: ${item.nome}!`);
+                atualizarStatusInterface();
+            } else {
+                logar(`<span style="color: #ff4444;">Ouro insuficiente para comprar este item!</span>`);
+            }
+        }
+
+        // --- MECÂNICAS DE BATALHA ---
+        function atacar() {
+            if (enemy.hp <= 0 || player.hp <= 0) return;
+
+            // --- TURNO DO JOGADOR ---
+            // Aplica dano ao inimigo
+            enemy.hp -= player.dano;
+            if (enemy.hp < 0) enemy.hp = 0;
+            
+            // Animação de dano no inimigo
+            animarDano("enemy-card");
+            logar(`Você atacou o ${enemy.nome} e causou ${player.dano} de dano!`);
+            atualizarStatusInterface();
+
+            // Verifica se o inimigo morreu
+            if (enemy.hp <= 0) {
+                logar(`<span style="color: #28a745; font-weight: bold;">Você derrotou o ${enemy.nome}! Ganhou ${enemy.recompensaOuro} de ouro.</span>`);
+                player.ouro += enemy.recompensaOuro;
+                atualizarStatusInterface();
+                
+                // Gerencia botões pós-morte
+                document.getElementById("next-enemy-btn").classList.remove("hidden");
+                return; // Encerra o turno, inimigo morto não ataca!
+            }
+
+            // --- TURNO DO INIMIGO (Contra-ataque automático) ---
+            setTimeout(() => {
+                if (enemy.hp > 0) {
+                    player.hp -= enemy.dano;
+                    if (player.hp < 0) player.hp = 0;
+
+                    // Animação de dano no jogador
+                    animarDano("player-card");
+                    logar(`<span style="color: #ff4444;">O ${enemy.nome} contra-atacou e te causou ${enemy.dano} de dano!</span>`);
+                    atualizarStatusInterface();
+
+                    // Verifica se o jogador morreu
+                    if (player.hp <= 0) {
+                        logar(`<span style="color: red; font-weight: bold;">Você morreu! Atualize a página para recomeçar sua jornada.</span>`);
+                    }
+                }
+            }, 600); // Pequeno atraso de 0.6s para dar ritmo ao combate
+        }
+
+        // --- SISTEMA DE ANIMAÇÃO ---
+        function animarDano(cardId) {
+            const card = document.getElementById(cardId);
+            card.classList.add("damage-blink");
+            setTimeout(() => {
+                card.classList.remove("damage-blink");
+            }, 300); // Remove o efeito visual após 0.3 segundos
+        }
+
+        // --- PRÓXIMO INIMIGO ---
+        function proximoInimigo() {
+            // Sorteia um inimigo aleatório da lista de monstros
+            const indiceAleatorio = Math.floor(Math.random() * listaInimigos.length);
+            const modeloInimigo = listaInimigos[indiceAleatorio];
+
+            // Define as propriedades do novo inimigo
+            enemy = {
+                nome: modeloInimigo.nome,
+                hp: modeloInimigo.hp,
+                maxHp: modeloInimigo.maxHp,
+                dano: modeloInimigo.dano,
+                recompensaOuro: modeloInimigo.recompensaOuro
+            };
+
+            // Cura parcial do Herói por sobreviver ao combate anterior
+            const curaBonus = Math.floor(player.maxHp * 0.25);
+            player.hp = Math.min(player.maxHp, player.hp + curaBonus);
+
+            logar(`Um novo oponente apareceu: <strong>${enemy.nome}</strong>! Você recuperou um pouco de vida.`);
+            atualizarStatusInterface();
+
+            // Esconde novamente o botão de buscar outro inimigo
+            document.getElementById("next-enemy-btn").classList.add("hidden");
+        }
+    </script>
 </body>
 </html>
-```
