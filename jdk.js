@@ -1,463 +1,260 @@
 // ==========================================
-// 1. CLASSE BASE: PERSONAGEM
+// 1. ESTADO GLOBAL DO JOGO
 // ==========================================
-class Personagem {
-    constructor(nome, vidaMaxima, vida, ataque, defesa, nivel, experiencia) {
-        this.nome = nome;
-        this.vidaMaxima = vidaMaxima;
-        this.vida = vida;
-        this.ataque = ataque;
-        this.defesa = defesa;
-        this.nivel = nivel;
-        this.experiencia = experiencia;
-        this.armaEquipada = null;
-    }
+let player = {
+    nome: "",
+    classe: "",
+    hp: 100,
+    maxHp: 100,
+    dano: 10,
+    ouro: 100,
+    imagem: "" // Nova propriedade para a imagem do jogador
+};
 
-    receberDano(dano) {
-        let danoFinal = dano - this.defesa;
-        if (danoFinal < 0) danoFinal = 0;
-        this.vida -= danoFinal;
-        if (this.vida < 0) this.vida = 0;
-        return danoFinal;
-    }
+let enemy = {
+    nome: "Lobo Selvagem",
+    hp: 50,
+    maxHp: 50,
+    dano: 8,
+    recompensaOuro: 40,
+    imagem: "" // Nova propriedade para a imagem do inimigo
+};
 
-    atacar(inimigo) {
-        let poderAtaque = this.ataque;
-        if (this.armaEquipada) {
-            poderAtaque += this.armaEquipada.bonusAtaque;
-        }
-        let danoCausado = inimigo.receberDano(poderAtaque);
-        return `${this.nome} atacou ${inimigo.nome} e causou ${danoCausado} de dano!`;
+// Lista de possíveis inimigos com suas respectivas imagens
+const listaInimigos = [
+    { 
+        nome: "Lobo Selvagem", 
+        hp: 50, 
+        maxHp: 50, 
+        dano: 8, 
+        recompensaOuro: 40,
+        imagem: "https://images.unsplash.com/photo-1590424753858-3c6d1b400120?auto=format&fit=crop&w=150&q=80" // Imagem de lobo
+    },
+    { 
+        nome: "Orc Saqueador", 
+        hp: 80, 
+        maxHp: 80, 
+        dano: 12, 
+        recompensaOuro: 70,
+        imagem: "https://images.unsplash.com/photo-1559103444-2453e1be4bf2?auto=format&fit=crop&w=150&q=80" // Representação de criatura verde/fantasia
+    },
+    { 
+        nome: "Esqueleto Arqueiro", 
+        hp: 60, 
+        maxHp: 60, 
+        dano: 15, 
+        recompensaOuro: 65,
+        imagem: "https://images.unsplash.com/photo-1509248961158-e54f6934749c?auto=format&fit=crop&w=150&q=80" // Representação de caveira/fantasma
+    },
+    { 
+        nome: "Dragão Jovem", 
+        hp: 150, 
+        maxHp: 150, 
+        dano: 22, 
+        recompensaOuro: 150,
+        imagem: "https://images.unsplash.com/photo-1607604276583-eef5d076aa5f?auto=format&fit=crop&w=150&q=80" // Representação de criatura fantástica/dragão
     }
+];
 
-    ganharExperiencia(xp) {
-        this.experiencia += xp;
-        let retorno = `${this.nome} ganhou ${xp} de XP!`;
-        if (this.experiencia >= this.nivel * 100) {
-            this.experiencia -= this.nivel * 100;
-            this.subirNivel();
-            retorno += `\n✨ ${this.nome} subiu para o nível ${this.nivel}!`;
-        }
-        return retorno;
-    }
-
-    subirNivel() {
-        this.nivel++;
-        this.vidaMaxima += 20;
-        this.vida = this.vidaMaxima;
-        this.ataque += 5;
-        this.defesa += 3;
-    }
-
-    equiparArma(arma) {
-        this.armaEquipada = arma;
-        return `${this.nome} equipou ${arma.nome}!`;
-    }
-
-    // RESOLVE O ERRO DO SEU HTML:
-    adicionarArma(arma) {
-        return this.equiparArma(arma);
-    }
-}
+// Banco de imagens para as classes do jogador
+const imagensClasses = {
+    "Guerreiro": "https://images.unsplash.com/photo-1558591710-4b4a1ae0f04d?auto=format&fit=crop&w=150&q=80", // Representação de armadura/guerreiro
+    "Mago": "https://images.unsplash.com/photo-1519074002996-a69e7ac46a42?auto=format&fit=crop&w=150&q=80",      // Representação de magia/mago
+    "Arqueiro": "https://images.unsplash.com/photo-1511071353536-40742129525c?auto=format&fit=crop&w=150&q=80"  // Representação de arco/arqueiro
+};
 
 // ==========================================
-// 2. CLASSES DOS HERÓIS (Guerreiro, Mago, Arqueiro)
+// 2. INICIALIZAÇÃO DO JOGO
 // ==========================================
-class Guerreiro extends Personagem {
-    constructor(nome) {
-        super(nome, 150, 150, 25, 20, 1, 0);
-        this.classe = "Guerreiro";
-        this.energia = 100;
-    }
+function iniciarJogo() {
+    player.nome = document.getElementById("char-name").value || "Herói Anônimo";
+    player.classe = document.getElementById("char-class").value;
 
-    ataqueEspecial(inimigo) {
-        if (this.energia >= 30) {
-            let dano = this.ataque * 2;
-            inimigo.receberDano(dano);
-            this.energia -= 30;
-            return `${this.nome} usou Golpe Poderoso causando ${dano} de dano!`;
-        } else {
-            return `${this.nome} não possui energia suficiente!`;
-        }
+    // Define os status iniciais e a imagem baseados na classe selecionada
+    if (player.classe === "Guerreiro") {
+        player.maxHp = 130;
+        player.dano = 12;
+    } else if (player.classe === "Mago") {
+        player.maxHp = 80;
+        player.dano = 22;
+    } else if (player.classe === "Arqueiro") {
+        player.maxHp = 100;
+        player.dano = 16;
     }
+    player.hp = player.maxHp;
+    player.imagem = imagensClasses[player.classe]; // Atribui a imagem correta da classe
 
-    defender() {
-        this.defesa += 10;
-        return `${this.nome} levantou o escudo e aumentou sua defesa temporariamente!`;
-    }
+    // Define a imagem inicial do primeiro inimigo (Lobo Selvagem)
+    enemy.imagem = listaInimigos[0].imagem;
 
-    recuperarEnergia() {
-        this.energia += 20;
-        if (this.energia > 100) this.energia = 100;
-    }
+    // Atualiza os textos e as imagens na tela
+    document.getElementById("display-name").innerText = player.nome;
+    document.getElementById("display-class").innerText = player.classe;
+    
+    atualizarStatusInterface();
+    atualizarLoja();
 
-    mostrarStatus() {
-        return `Nome: ${this.nome} | Classe: ${this.classe} | Nível: ${this.nivel}\n` +
-               `Vida: ${this.vida}/${this.vidaMaxima} | Energia: ${this.energia}/100\n` +
-               `Ataque: ${this.ataque} | Defesa: ${this.defesa} | XP: ${this.experiencia}`;
-    }
-}
+    // Esconde a tela de criação e mostra os botões e painel do jogo
+    document.getElementById("setup-screen").classList.add("hidden");
+    document.getElementById("game-screen").classList.remove("hidden");
 
-class Mago extends Personagem {
-    constructor(nome) {
-        super(nome, 100, 100, 30, 10, 1, 0);
-        this.classe = "Mago";
-        this.mana = 120;
-        this.manaMaxima = 120;
-    }
-
-    ataqueEspecial(inimigo) {
-        if (this.mana >= 40) {
-            let dano = this.ataque * 2.5;
-            inimigo.receberDano(dano);
-            this.mana -= 40;
-            return `${this.nome} conjurou Bola de Fogo causando ${dano} de dano mágico!`;
-        } else {
-            return `${this.nome} não possui mana suficiente!`;
-        }
-    }
-
-    curar() {
-        if (this.mana >= 25) {
-            let cura = 40;
-            this.vida += cura;
-            if (this.vida > this.vidaMaxima) this.vida = this.vidaMaxima;
-            this.mana -= 25;
-            return `${this.nome} usou Cura Divina e recuperou ${cura} de vida!`;
-        } else {
-            return `${this.nome} não tem mana para curar!`;
-        }
-    }
-
-    recuperarMana() {
-        this.mana += 25;
-        if (this.mana > this.manaMaxima) this.mana = this.manaMaxima;
-    }
-
-    mostrarStatus() {
-        return `Nome: ${this.nome} | Classe: ${this.classe} | Nível: ${this.nivel}\n` +
-               `Vida: ${this.vida}/${this.vidaMaxima} | Mana: ${this.mana}/${this.manaMaxima}\n` +
-               `Ataque: ${this.ataque} | Defesa: ${this.defesa} | XP: ${this.experiencia}`;
-    }
-}
-
-class Arqueiro extends Personagem {
-    constructor(nome) {
-        super(nome, 120, 120, 28, 12, 1, 0);
-        this.classe = "Arqueiro";
-        this.foco = 100;
-    }
-
-    ataqueEspecial(inimigo) {
-        if (this.foco >= 35) {
-            let dano = this.ataque * 2.2;
-            inimigo.receberDano(dano);
-            this.foco -= 35;
-            return `${this.nome} usou Flecha Perfurante causando ${dano} de dano!`;
-        } else {
-            return `${this.nome} não possui foco suficiente!`;
-        }
-    }
-
-    concentrar() {
-        this.foco += 30;
-        if (this.foco > 100) this.foco = 100;
-        this.ataque += 2;
-        return `${this.nome} se concentrou, recuperando foco e aumentando levemente o ataque!`;
-    }
-
-    mostrarStatus() {
-        return `Nome: ${this.nome} | Classe: ${this.classe} | Nível: ${this.nivel}\n` +
-               `Vida: ${this.vida}/${this.vidaMaxima} | Foco: ${this.foco}/100\n` +
-               `Ataque: ${this.ataque} | Defesa: ${this.defesa} | XP: ${this.experiencia}`;
-    }
+    logar(`O ${player.classe} ${player.nome} entrou na arena de batalha!`);
 }
 
 // ==========================================
-// 3. EQUIPAMENTOS E ITENS (Arma, Item, Loja)
+// 3. ATUALIZAÇÕES VISUAIS (INTERFACE)
 // ==========================================
-class Arma {
-    constructor(nome, bonusAtaque, preco) {
-        this.nome = nome;
-        this.bonusAtaque = bonusAtaque;
-        this.preco = preco;
-    }
+function atualizarStatusInterface() {
+    // Atualiza dados e IMAGEM do Jogador
+    document.getElementById("display-gold").innerText = player.ouro;
+    document.getElementById("display-damage").innerText = player.dano;
+    document.getElementById("player-hp-text").innerText = `${player.hp}/${player.maxHp}`;
+    document.getElementById("player-img").src = player.imagem; // Atualiza a foto do herói
+    document.getElementById("player-img").alt = player.classe;
+    
+    const playerHpPercent = Math.max(0, (player.hp / player.maxHp) * 100);
+    document.getElementById("player-hp-bar").style.width = `${playerHpPercent}%`;
+
+    // Atualiza dados e IMAGEM do Inimigo
+    document.getElementById("enemy-name").innerText = enemy.nome;
+    document.getElementById("enemy-damage-text").innerText = enemy.dano;
+    document.getElementById("enemy-hp-text").innerText = `${enemy.hp}/${enemy.maxHp}`;
+    document.getElementById("enemy-img").src = enemy.imagem; // Atualiza a foto do monstro
+    document.getElementById("enemy-img").alt = enemy.nome;
+    
+    const enemyHpPercent = Math.max(0, (enemy.hp / enemy.maxHp) * 100);
+    document.getElementById("enemy-hp-bar").style.width = `${enemyHpPercent}%`;
 }
 
-class Item {
-    constructor(nome, tipo, efeito, valorEfeito, preco) {
-        this.nome = nome;
-        this.tipo = tipo; // "Cura", "Mana" ou "Energia"
-        this.efeito = efeito; 
-        this.valorEfeito = valorEfeito;
-        this.preco = preco;
-    }
-
-    usar(personagem) {
-        if (this.tipo === "Cura") {
-            personagem.vida += this.valorEfeito;
-            if (personagem.vida > personagem.vidaMaxima) {
-                personagem.vida = personagem.vidaMaxima;
-            }
-            return `${personagem.nome} usou ${this.nome} e recuperou ${this.valorEfeito} de vida!`;
-        }
-        
-        if (this.tipo === "Mana" && personagem.classe === "Mago") {
-            personagem.mana += this.valorEfeito;
-            if (personagem.mana > personagem.manaMaxima) {
-                personagem.mana = personagem.manaMaxima;
-            }
-            return `${personagem.nome} usou ${this.nome} e recuperou ${this.valorEfeito} de mana!`;
-        }
-
-        if (this.tipo === "Energia" && personagem.classe === "Guerreiro") {
-            personagem.energia += this.valorEfeito;
-            if (personagem.energia > 100) personagem.energia = 100;
-            return `${personagem.nome} usou ${this.nome} e recuperou ${this.valorEfeito} de energia!`;
-        }
-
-        return `${this.nome} não fez efeito no ${personagem.nome}.`;
-    }
+// Função para adicionar mensagens no diário de batalha
+function logar(texto) {
+    const logBox = document.getElementById("combat-log");
+    logBox.innerHTML += `<br>> ${texto}`;
+    logBox.scrollTop = logBox.scrollHeight;
 }
 
-class Loja {
-    constructor() {
-        this.armasDisponiveis = [
-            new Arma("Espada Curta", 5, 20),
-            new Arma("Cajado Elemental", 8, 35),
-            new Arma("Arco Composto", 6, 25),
-            new Arma("Excalibur", 20, 100)
+// ==========================================
+// 4. MERCADO DINÂMICO (LOJA)
+// ==========================================
+function atualizarLoja() {
+    const shopDiv = document.getElementById("shop-items");
+    shopDiv.innerHTML = "";
+
+    let itensDisponiveis = [];
+
+    if (player.classe === "Guerreiro") {
+        itensDisponiveis = [
+            { nome: "Escudo de Ferro (+30 HP)", custo: 40, tipo: "hp", valor: 30 },
+            { nome: "Espada Pesada (+5 Dano)", custo: 50, tipo: "dano", valor: 5 }
         ];
-
-        this.itensDisponiveis = [
-            new Item("Poção de Vida P", "Cura", "Cura Vida", 30, 10),
-            new Item("Poção de Vida G", "Cura", "Cura Vida", 80, 25),
-            new Item("Poção de Mana", "Mana", "Recupera Mana", 40, 15)
+    } else if (player.classe === "Mago") {
+        itensDisponiveis = [
+            { nome: "Cajado Arcano (+12 Dano)", custo: 60, tipo: "dano", valor: 12 },
+            { nome: "Pocão de Mana Máxima (+15 HP)", custo: 30, tipo: "hp", valor: 15 }
+        ];
+    } else if (player.classe === "Arqueiro") {
+        itensDisponiveis = [
+            { nome: "Arco Composto (+8 Dano)", custo: 50, tipo: "dano", valor: 8 },
+            { nome: "Botas de Couro Rápido (+20 HP)", custo: 35, tipo: "hp", valor: 20 }
         ];
     }
 
-    mostrarProdutos() {
-        let catalogo = "=== LOJA DO REINO ===\n--- Armas ---\n";
-        this.armasDisponiveis.forEach((a, i) => {
-            catalogo += `[A${i}] ${a.nome} (+${a.bonusAtaque} Atq) - Preço: ${a.preco} moedas\n`;
-        });
-        catalogo += "\n--- Consumíveis ---\n";
-        this.itensDisponiveis.forEach((item, i) => {
-            catalogo += `[I${i}] ${item.nome} (${item.tipo}: +${item.valorEfeito}) - Preço: ${item.preco} moedas\n`;
-        });
-        return catalogo;
-    }
+    itensDisponiveis.forEach(item => {
+        const btn = document.createElement("button");
+        btn.innerText = `${item.nome} - Preço: ${item.custo}g`;
+        btn.onclick = () => comprarItem(item);
+        shopDiv.appendChild(btn);
+    });
+}
 
-    comprarArma(indice, personagem, carteira) {
-        let arma = this.armasDisponiveis[indice];
-        if (arma && carteira.moedas >= arma.preco) {
-            carteira.moedas -= arma.preco;
-            personagem.adicionarArma(arma); // Usa o método corrigido compatível com seu HTML
-            return `Sucesso! Você comprou e equipou: ${arma.nome}.`;
+function comprarItem(item) {
+    if (player.ouro >= item.custo) {
+        player.ouro -= item.custo;
+        
+        if (item.tipo === "hp") {
+            player.maxHp += item.valor;
+            player.hp += item.valor;
+        } else if (item.tipo === "dano") {
+            player.dano += item.valor;
         }
-        return "Moedas insuficientes ou item inválido!";
-    }
-
-    comprarItem(indice, carteira, inventario) {
-        let item = this.itensDisponiveis[indice];
-        if (item && carteira.moedas >= item.preco) {
-            carteira.moedas -= item.preco;
-            inventario.push(item);
-            return `Sucesso! Você comprou e guardou: ${item.nome}.`;
-        }
-        return "Moedas insuficientes ou item inválido!";
+        
+        logar(`Você comprou: <strong>${item.nome}</strong>!`);
+        atualizarStatusInterface();
+    } else {
+        logar(`<span style="color: #ff4444;">Ouro insuficiente para comprar este item!</span>`);
     }
 }
 
 // ==========================================
-// 4. INIMIGOS E OBJETIVOS (Monstro, Missão)
+// 5. MECÂNICAS DE BATALHA (TURNO A TURNO)
 // ==========================================
-class Monstro {
-    constructor(nome, vidaMaxima, ataque, defesa, xpRecompensa, moedasRecompensa) {
-        this.nome = nome;
-        this.vidaMaxima = vidaMaxima;
-        this.vida = vidaMaxima;
-        this.ataque = ataque;
-        this.defesa = defesa;
-        this.xpRecompensa = xpRecompensa;
-        this.moedasRecompensa = moedasRecompensa;
+function atacar() {
+    if (enemy.hp <= 0 || player.hp <= 0) return;
+
+    // --- TURNO DO JOGADOR ---
+    enemy.hp -= player.dano;
+    if (enemy.hp < 0) enemy.hp = 0;
+    
+    animarDano("enemy-card");
+    logar(`Você atacou o ${enemy.nome} e causou ${player.dano} de dano!`);
+    atualizarStatusInterface();
+
+    if (enemy.hp <= 0) {
+        logar(`<span style="color: #28a745; font-weight: bold;">Você derrotou o ${enemy.nome}! Ganhou ${enemy.recompensaOuro} de ouro.</span>`);
+        player.ouro += enemy.recompensaOuro;
+        atualizarStatusInterface();
+        
+        document.getElementById("next-enemy-btn").classList.remove("hidden");
+        return;
     }
 
-    receberDano(dano) {
-        let danoFinal = dano - this.defesa;
-        if (danoFinal < 0) danoFinal = 0;
-        this.vida -= danoFinal;
-        if (this.vida < 0) this.vida = 0;
-        return danoFinal;
-    }
+    // --- TURNO DO INIMIGO ---
+    setTimeout(() => {
+        if (enemy.hp > 0) {
+            player.hp -= enemy.dano;
+            if (player.hp < 0) player.hp = 0;
 
-    atacar(jogador) {
-        let danoCausado = jogador.receberDano(this.ataque);
-        return `${this.nome} contra-atacou ${jogador.nome} causando ${danoCausado} de dano!`;
-    }
+            animarDano("player-card");
+            logar(`<span style="color: #ff4444;">O ${enemy.nome} contra-atacou e te causou ${enemy.dano} de dano!</span>`);
+            atualizarStatusInterface();
 
-    estaVivo() {
-        return this.vida > 0;
-    }
-}
-
-class Missao {
-    constructor(titulo, descricao, xpRecompensa, moedasRecompensa, monstrosNecessarios) {
-        this.titulo = titulo;
-        this.descricao = descricao;
-        this.xpRecompensa = xpRecompensa;
-        this.moedasRecompensa = moedasRecompensa;
-        this.monstrosNecessarios = monstrosNecessarios;
-        this.progresso = 0;
-        this.completada = false;
-    }
-
-    registrarAbate() {
-        if (!this.completada) {
-            this.progresso++;
-            if (this.progresso >= this.monstrosNecessarios) {
-                this.completada = true;
-                return `\n🏆 Missão "${this.titulo}" concluída!`;
+            if (player.hp <= 0) {
+                logar(`<span style="color: red; font-weight: bold;">Fim de jogo! Você foi derrotado. Recarregue a página para tentar novamente!</span>`);
             }
         }
-        return "";
-    }
+    }, 600);
+}
+
+function animarDano(cardId) {
+    const card = document.getElementById(cardId);
+    card.classList.add("damage-blink");
+    setTimeout(() => {
+        card.classList.remove("damage-blink");
+    }, 300);
 }
 
 // ==========================================
-// 5. CONEXÃO COM O HTML (INTEGRAÇÃO DOM)
+// 6. BUSCAR NOVO INIMIGO
 // ==========================================
+function proximoInimigo() {
+    const indiceAleatorio = Math.floor(Math.random() * listaInimigos.length);
+    const modeloInimigo = listaInimigos[indiceAleatorio];
 
-// Mapeamento dos elementos visuais do seu HTML
-const statusJogadorDiv = document.getElementById("status-jogador") || document.createElement("div");
-const statusMonstroDiv = document.getElementById("status-monstro") || document.createElement("div");
-const historicoDiv = document.getElementById("historico-combate") || document.createElement("div");
+    // Reinicia o inimigo com o modelo sorteado, incluindo a imagem dele
+    enemy = {
+        nome: modeloInimigo.nome,
+        hp: modeloInimigo.hp,
+        maxHp: modeloInimigo.maxHp,
+        dano: modeloInimigo.dano,
+        recompensaOuro: modeloInimigo.recompensaOuro,
+        imagem: modeloInimigo.imagem // Nova imagem aplicada aqui
+    };
 
-const btnAtacar = document.getElementById("btn-atacar");
-const btnEspecial = document.getElementById("btn-especial");
-const btnDefender = document.getElementById("btn-defender");
-const btnComprarArma = document.getElementById("btn-comprar-arma");
-const btnUsarItem = document.getElementById("btn-usar-item");
+    const curaBonus = Math.floor(player.maxHp * 0.25);
+    player.hp = Math.min(player.maxHp, player.hp + curaBonus);
 
-// Instanciação das entidades ativas do jogo
-const jogador = new Guerreiro("Thorin"); 
-let monstro = new Monstro("Goblin Saqueador", 50, 12, 3, 40, 15);
-const carteiraJogador = { moedas: 50 };
-const inventarioJogador = [];
-const lojaDoJogo = new Loja();
-const missaoAtiva = new Missao("Expurgo de Goblins", "Derrote 2 Goblins", 50, 30, 2);
+    logar(`Um novo oponente apareceu: <strong>${enemy.nome}</strong>! Você recuperou ${curaBonus} de vida como bônus.`);
+    atualizarStatusInterface();
 
-// Função para manter a interface atualizada
-function atualizarInterface() {
-    if (statusJogadorDiv) {
-        statusJogadorDiv.innerHTML = `<pre>${jogador.mostrarStatus()}\nMoedas: ${carteiraJogador.moedas}\nInventário: ${inventarioJogador.length} itens</pre>`;
-    }
-    if (statusMonstroDiv) {
-        statusMonstroDiv.innerHTML = `<h3>Monstro: ${monstro.nome}</h3>
-                                      <p>Vida: ${monstro.vida}/${monstro.vidaMaxima} | Ataque: ${monstro.ataque} | Defesa: ${monstro.defesa}</p>`;
-    }
+    document.getElementById("next-enemy-btn").classList.add("hidden");
 }
-
-// Registrar eventos de clique com segurança (só ativa se o botão existir no HTML)
-if (btnAtacar) {
-    btnAtacar.addEventListener("click", () => {
-        if (jogador.vida <= 0) {
-            historicoDiv.innerHTML += `<p style="color: red;">💀 Você está derrotado e não pode atacar!</p>`;
-            return;
-        }
-        if (!monstro.estaVivo()) {
-            historicoDiv.innerHTML += `<p>O monstro já está morto. Procure outro combate!</p>`;
-            return;
-        }
-
-        // Turno do Jogador
-        let logAtaque = jogador.atacar(monstro);
-        historicoDiv.innerHTML += `<p>${logAtaque}</p>`;
-
-        // Turno do Inimigo
-        if (monstro.estaVivo()) {
-            let logContraAtaque = monstro.atacar(jogador);
-            historicoDiv.innerHTML += `<p style="color: red;">${logContraAtaque}</p>`;
-        } else {
-            historicoDiv.innerHTML += `<p style="color: green;">🎉 Você derrotou o ${monstro.nome}!</p>`;
-            historicoDiv.innerHTML += `<p style="color: green;">${jogador.ganharExperiencia(monstro.xpRecompensa)}</p>`;
-            carteiraJogador.moedas += monstro.moedasRecompensa;
-
-            // Registrar progresso da missão
-            let logMissao = missaoAtiva.registrarAbate();
-            if (logMissao) {
-                historicoDiv.innerHTML += `<p style="color: gold;">${logMissao}</p>`;
-                jogador.ganharExperiencia(missaoAtiva.xpRecompensa);
-                carteiraJogador.moedas += missaoAtiva.moedasRecompensa;
-            }
-        }
-        atualizarInterface();
-    });
-}
-
-if (btnEspecial) {
-    btnEspecial.addEventListener("click", () => {
-        if (jogador.vida <= 0 || !monstro.estaVivo()) return;
-
-        let logEspecial = jogador.ataqueEspecial(monstro);
-        historicoDiv.innerHTML += `<p style="color: purple;">${logEspecial}</p>`;
-
-        if (monstro.estaVivo()) {
-            let logContraAtaque = monstro.atacar(jogador);
-            historicoDiv.innerHTML += `<p style="color: red;">${logContraAtaque}</p>`;
-        } else {
-            historicoDiv.innerHTML += `<p style="color: green;">🎉 Você derrotou o ${monstro.nome}!</p>`;
-            jogador.ganharExperiencia(monstro.xpRecompensa);
-            carteiraJogador.moedas += monstro.moedasRecompensa;
-        }
-        atualizarInterface();
-    });
-}
-
-if (btnDefender) {
-    btnDefender.addEventListener("click", () => {
-        if (jogador.vida <= 0 || !monstro.estaVivo()) return;
-        
-        let logDefesa = jogador.defender();
-        historicoDiv.innerHTML += `<p style="color: blue;">${logDefesa}</p>`;
-        
-        let logContraAtaque = monstro.atacar(jogador);
-        historicoDiv.innerHTML += `<p style="color: red;">${logContraAtaque}</p>`;
-        
-        // Remove o bônus temporário de defesa após o ataque do inimigo
-        jogador.defesa -= 10; 
-        atualizarInterface();
-    });
-}
-
-if (btnComprarArma) {
-    btnComprarArma.addEventListener("click", () => {
-        let resultado = lojaDoJogo.comprarArma(0, jogador, carteiraJogador); // Compra Espada Curta (índice 0)
-        historicoDiv.innerHTML += `<p style="color: gold;">${resultado}</p>`;
-        atualizarInterface();
-    });
-}
-
-if (btnUsarItem) {
-    btnUsarItem.addEventListener("click", () => {
-        if (inventarioJogador.length > 0) {
-            let item = inventarioJogador.pop();
-            let resultado = item.usar(jogador);
-            historicoDiv.innerHTML += `<p style="color: green;">${resultado}</p>`;
-        } else {
-            // Se o inventário estiver vazio, tenta comprar uma poção automaticamente se tiver dinheiro
-            if (carteiraJogador.moedas >= 10) {
-                lojaDoJogo.comprarItem(0, carteiraJogador, inventarioJogador); // Compra Poção de Vida P
-                let item = inventarioJogador.pop();
-                let resultado = item.usar(jogador);
-                historicoDiv.innerHTML += `<p style="color: green;">Comprou e usou: ${resultado}</p>`;
-            } else {
-                historicoDiv.innerHTML += `<p style="color: orange;">Sem poções no inventário e sem moedas para comprar!</p>`;
-            }
-        }
-        atualizarInterface();
-    });
-}
-
-// Inicializa o estado visual da tela no carregamento
-atualizarInterface();
