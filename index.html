@@ -1,39 +1,145 @@
 <!DOCTYPE html>
+<html lang="pt-BR">
+
 <head>
-   <meta charset="UTF-8">
+    <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>rpg medieval</title>
+    <title>RPG Medieval</title>
+
     <link rel="stylesheet" href="style.css">
 </head>
+
 <body>
-<script src="jdk.js"></script>
+
 <div class="container">
-<button id="iniciar">▶ Iniciar Aventura</button>
 
-<div id="saida"></div>
+    <h1>RPG Medieval</h1>
 
-    <h1> RPG Medieval </h1>
-</div> 
+    <div id="menu">
 
-   
+        <h2>Crie seu Herói</h2>
+
+        <label>Nome do Herói</label><br>
+        <input type="text" id="nome" placeholder="Digite o nome"><br><br>
+
+        <h2>Escolha sua Classe</h2>
+
+        <div class="classes">
+
+            <div class="classe" onclick="selecionarClasse('Guerreiro', this)">
+                <img src="img/guerreiro.png" alt="Guerreiro">
+                <h3>Guerreiro</h3>
+            </div>
+
+            <div class="classe" onclick="selecionarClasse('Mago', this)">
+                <img src="img/mago.png" alt="Mago">
+                <h3>Mago</h3>
+            </div>
+
+            <div class="classe" onclick="selecionarClasse('Arqueiro', this)">
+                <img src="img/arqueiro.png" alt="Arqueiro">
+                <h3>Arqueiro</h3>
+            </div>
+
+        </div>
+
+        <br>
+
+        <button id="iniciar">▶ Começar Aventura</button>
+
+    </div>
+
+    <hr>
+
+    <div id="saida"></div>
+
+</div>
 
 <script src="jdk.js"></script>
 
 <script>
+
 const saida = document.getElementById("saida");
 
 const logOriginal = console.log;
 
-console.log = function (...mensagens) {
+console.log = function (...mensagens){
+
     logOriginal(...mensagens);
+
     saida.innerHTML += mensagens.join(" ") + "<br>";
+
+    saida.scrollTop = saida.scrollHeight;
+
 };
 
-document.getElementById("iniciar").addEventListener("click", function () {
-    this.disabled = true;
-    main();
+let classeEscolhida = "";
+
+function selecionarClasse(classe, elemento){
+
+    classeEscolhida = classe;
+
+    document.querySelectorAll(".classe").forEach(function(c){
+
+        c.classList.remove("selecionada");
+
+    });
+
+    elemento.classList.add("selecionada");
+
+}
+
+document.getElementById("iniciar").addEventListener("click", function(){
+
+    const nome = document.getElementById("nome").value.trim();
+
+    if(nome === ""){
+
+        alert("Digite o nome do personagem.");
+        return;
+
+    }
+
+    if(classeEscolhida === ""){
+
+        alert("Escolha uma classe.");
+        return;
+
+    }
+
+    let jogador;
+
+    if(classeEscolhida === "Guerreiro"){
+
+        jogador = new Guerreiro(nome);
+
+    }
+
+    else if(classeEscolhida === "Mago"){
+
+        jogador = new Mago(nome);
+
+    }
+
+    else{
+
+        jogador = new Arqueiro(nome);
+
+    }
+
+    const espada = new Arma("Espada de Ferro",8,50);
+
+    jogador.adicionarArma(espada);
+
+    jogador.equiparArma(espada);
+
+    document.getElementById("menu").style.display = "none";
+
+    fase1(jogador);
+
 });
+
 </script>
-    </script>
+
 </body>
 </html>
