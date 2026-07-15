@@ -630,49 +630,48 @@ function main() {
 // FASE 1 - Floresta Sombria
 // ==========================
 
-function fase1(jogador) {
+function fase1(jogador){
 
-    console.log("==================================");
-    console.log("        FASE 1");
-    console.log("     FLORESTA SOMBRIA");
-    console.log("==================================");
+    jogadorAtual = jogador;
 
-    console.log(`${jogador.nome} entrou na Floresta Sombria em busca de monstros.`);
+    monstroAtual = new Monstro("Slime",30,5,2,30,10);
 
-    const slime = new Monstro("Slime", 30, 5, 2, 30, 10);
+    document.getElementById("imgMonstro").src="img/slime.png";
 
-    console.log("\n⚔ Um Slime apareceu!");
+    if(jogador instanceof Guerreiro){
 
-    while (jogador.estaVivo() && slime.estaVivo()) {
-
-        jogador.atacar(slime);
-
-        if (slime.estaVivo()) {
-            slime.atacar(jogador);
-        }
+        document.getElementById("imgJogador").src="img/guerreiro.png";
 
     }
 
-    if (jogador.estaVivo()) {
+    else if(jogador instanceof Mago){
 
-        console.log("\n🏆 Você venceu a batalha!");
-
-        const missao = new Missao(
-            "Eliminar o Slime",
-            slime.getXpRecompensa(),
-            slime.getOuroRecompensa()
-        );
-
-        missao.concluir(jogador);
-        jogador.mostrarStatus();
-
-    } else {
-
-        console.log("\n💀 GAME OVER");
+        document.getElementById("imgJogador").src="img/mago.png";
 
     }
+
+    else{
+
+        document.getElementById("imgJogador").src="img/arqueiro.png";
+
+    }
+
+    atualizarBarras();
+
+    console.log("⚔ Um Slime apareceu!");
 }
 
+function atualizarBarras(){
+
+    document.getElementById("vidaJogador").style.width=
+
+    (jogadorAtual.vida/jogadorAtual.vidaMaxima*100)+"%";
+
+    document.getElementById("vidaMonstro").style.width=
+
+    (monstroAtual.vida/monstroAtual.vidaMaxima*100)+"%";
+
+}
 // ==========================
 // BOTÃO INICIAR
 // ==========================
@@ -702,4 +701,81 @@ botao.addEventListener("click", function () {
     jogador.equiparArma(espada);
 
     fase1(jogador);
-});
+   //=========================
+// VARIÁVEIS
+//=========================
+
+let jogadorAtual;
+let monstroAtual;
+
+//=========================
+// FASE 1
+//=========================
+
+function fase1(jogador){
+
+    jogadorAtual = jogador;
+
+    monstroAtual = new Monstro("Slime",30,5,2,30,10);
+
+    if(jogador instanceof Guerreiro){
+        document.getElementById("imgJogador").src="img/guerreiro.png";
+    }
+    else if(jogador instanceof Mago){
+        document.getElementById("imgJogador").src="img/mago.png";
+    }
+    else{
+        document.getElementById("imgJogador").src="img/arqueiro.png";
+    }
+
+    document.getElementById("imgMonstro").src="img/slime.png";
+
+    atualizarBarras();
+
+    console.log("==================================");
+    console.log("FLORESTA SOMBRIA");
+    console.log("==================================");
+    console.log("⚔ Um Slime apareceu!");
+}
+
+//=========================
+// BARRAS
+//=========================
+
+function atualizarBarras(){
+
+    document.getElementById("vidaJogador").style.width =
+    (jogadorAtual.vida/jogadorAtual.vidaMaxima*100)+"%";
+
+    document.getElementById("vidaMonstro").style.width =
+    (monstroAtual.vida/monstroAtual.vidaMaxima*100)+"%";
+
+}
+
+//=========================
+// BOTÃO ATACAR
+//=========================
+
+document.getElementById("btnAtacar").onclick=function(){
+
+    if(!jogadorAtual.estaVivo()) return;
+
+    if(!monstroAtual.estaVivo()) return;
+
+    jogadorAtual.atacar(monstroAtual);
+
+    atualizarBarras();
+
+    if(monstroAtual.estaVivo()){
+
+        monstroAtual.atacar(jogadorAtual);
+
+        atualizarBarras();
+
+    }else{
+
+        console.log("🏆 Você derrotou o Slime!");
+
+    }
+
+};
