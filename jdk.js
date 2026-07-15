@@ -683,7 +683,18 @@ botao.addEventListener("click", function () {
 
     this.disabled = true;
 
-    const jogador = new Guerreiro("Arthur");
+    const nome = document.getElementById("nome").value;
+    const classe = document.querySelector('input[name="classe"]:checked').value;
+
+    let jogador;
+
+    if (classe === "guerreiro") {
+        jogador = new Guerreiro(nome);
+    } else if (classe === "mago") {
+        jogador = new Mago(nome);
+    } else {
+        jogador = new Arqueiro(nome);
+    }
 
     const espada = new Arma("Espada de Ferro", 8, 50);
 
@@ -691,5 +702,4 @@ botao.addEventListener("click", function () {
     jogador.equiparArma(espada);
 
     fase1(jogador);
-main();
 });
