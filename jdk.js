@@ -53,6 +53,11 @@ class Personagem {
         this.armaEquipada = arma;
         return `${this.nome} equipou ${arma.nome}!`;
     }
+
+    // RESOLVE O ERRO DO SEU HTML:
+    adicionarArma(arma) {
+        return this.equiparArma(arma);
+    }
 }
 
 // ==========================================
@@ -247,7 +252,7 @@ class Loja {
         let arma = this.armasDisponiveis[indice];
         if (arma && carteira.moedas >= arma.preco) {
             carteira.moedas -= arma.preco;
-            personagem.equiparArma(arma);
+            personagem.adicionarArma(arma); // Usa o método corrigido compatível com seu HTML
             return `Sucesso! Você comprou e equipou: ${arma.nome}.`;
         }
         return "Moedas insuficientes ou item inválido!";
@@ -320,67 +325,139 @@ class Missao {
 }
 
 // ==========================================
-// 5. SIMULAÇÃO E EXECUÇÃO DO JOGO (Main)
+// 5. CONEXÃO COM O HTML (INTEGRAÇÃO DOM)
 // ==========================================
-const carteira = { moedas: 50 };
-const inventario = [];
-const loja = new Loja();
 
-// Escolha o herói instanciando a classe desejada:
-const heroi = new Guerreiro("Thorin"); 
+// Mapeamento dos elementos visuais do seu HTML
+const statusJogadorDiv = document.getElementById("status-jogador") || document.createElement("div");
+const statusMonstroDiv = document.getElementById("status-monstro") || document.createElement("div");
+const historicoDiv = document.getElementById("historico-combate") || document.createElement("div");
 
-console.log(`--- SEJA BEM-VINDO AO REINO DE JS ---`);
-console.log(heroi.mostrarStatus());
-console.log(`Moedas iniciais: ${carteira.moedas}\n`);
+const btnAtacar = document.getElementById("btn-atacar");
+const btnEspecial = document.getElementById("btn-especial");
+const btnDefender = document.getElementById("btn-defender");
+const btnComprarArma = document.getElementById("btn-comprar-arma");
+const btnUsarItem = document.getElementById("btn-usar-item");
 
-// Aceitando uma missão
-const missaoPrincipal = new Missao("Expurgo de Goblins", "Derrote 2 Goblins para proteger a vila", 50, 30, 2);
-console.log(`📜 Nova missão ativa: "${missaoPrincipal.titulo}" - Recompensa: ${missaoPrincipal.moedasRecompensa} Moedas.`);
+// Instanciação das entidades ativas do jogo
+const jogador = new Guerreiro("Thorin"); 
+let monstro = new Monstro("Goblin Saqueador", 50, 12, 3, 40, 15);
+const carteiraJogador = { moedas: 50 };
+const inventarioJogador = [];
+const lojaDoJogo = new Loja();
+const missaoAtiva = new Missao("Expurgo de Goblins", "Derrote 2 Goblins", 50, 30, 2);
 
-// Passando na Loja
-console.log("\n" + loja.mostrarProdutos());
-console.log(loja.comprarArma(0, heroi, carteira));   // Compra 'Espada Curta'
-console.log(loja.comprarItem(0, carteira, inventario)); // Compra 'Poção de Vida P'
-console.log(`Moedas restantes: ${carteira.moedas}\n`);
-
-// Combate contra Goblin 1
-let goblin = new Monstro("Goblin Saqueador", 40, 15, 5, 40, 15);
-console.log(`⚔️ Um ${goblin.nome} selvagem apareceu!`);
-
-while (goblin.estaVivo() && heroi.vida > 0) {
-    // Turno do Jogador (Ataque Especial)
-    console.log(heroi.ataqueEspecial(goblin));
-    console.log(`Vida do ${goblin.nome}: ${goblin.vida}/${goblin.vidaMaxima}`);
-
-    if (goblin.estaVivo()) {
-        // Turno do Goblin
-        console.log(goblin.atacar(heroi));
-        console.log(`Sua Vida: ${heroi.vida}/${heroi.vidaMaxima}\n`);
+// Função para manter a interface atualizada
+function atualizarInterface() {
+    if (statusJogadorDiv) {
+        statusJogadorDiv.innerHTML = `<pre>${jogador.mostrarStatus()}\nMoedas: ${carteiraJogador.moedas}\nInventário: ${inventarioJogador.length} itens</pre>`;
+    }
+    if (statusMonstroDiv) {
+        statusMonstroDiv.innerHTML = `<h3>Monstro: ${monstro.nome}</h3>
+                                      <p>Vida: ${monstro.vida}/${monstro.vidaMaxima} | Ataque: ${monstro.ataque} | Defesa: ${monstro.defesa}</p>`;
     }
 }
 
-// Pós-combate
-if (heroi.vida > 0) {
-    console.log(`🎉 Você derrotou o ${goblin.nome}!`);
-    console.log(heroi.ganharExperiencia(goblin.xpRecompensa));
-    carteira.moedas += goblin.moedasRecompensa;
-    console.log(`Moedas recebidas: ${goblin.moedasRecompensa}. Saldo: ${carteira.moedas}`);
-    
-    // Registra progresso na missão
-    let avisoMissao = missaoPrincipal.registrarAbate();
-    if (avisoMissao) {
-        console.log(avisoMissao);
-        heroi.ganharExperiencia(missaoPrincipal.xpRecompensa);
-        carteira.moedas += missaoPrincipal.moedasRecompensa;
-    }
-} else {
-    console.log("\n💀 Você foi derrotado! Fim de jogo.");
+// Registrar eventos de clique com segurança (só ativa se o botão existir no HTML)
+if (btnAtacar) {
+    btnAtacar.addEventListener("click", () => {
+        if (jogador.vida <= 0) {
+            historicoDiv.innerHTML += `<p style="color: red;">💀 Você está derrotado e não pode atacar!</p>`;
+            return;
+        }
+        if (!monstro.estaVivo()) {
+            historicoDiv.innerHTML += `<p>O monstro já está morto. Procure outro combate!</p>`;
+            return;
+        }
+
+        // Turno do Jogador
+        let logAtaque = jogador.atacar(monstro);
+        historicoDiv.innerHTML += `<p>${logAtaque}</p>`;
+
+        // Turno do Inimigo
+        if (monstro.estaVivo()) {
+            let logContraAtaque = monstro.atacar(jogador);
+            historicoDiv.innerHTML += `<p style="color: red;">${logContraAtaque}</p>`;
+        } else {
+            historicoDiv.innerHTML += `<p style="color: green;">🎉 Você derrotou o ${monstro.nome}!</p>`;
+            historicoDiv.innerHTML += `<p style="color: green;">${jogador.ganharExperiencia(monstro.xpRecompensa)}</p>`;
+            carteiraJogador.moedas += monstro.moedasRecompensa;
+
+            // Registrar progresso da missão
+            let logMissao = missaoAtiva.registrarAbate();
+            if (logMissao) {
+                historicoDiv.innerHTML += `<p style="color: gold;">${logMissao}</p>`;
+                jogador.ganharExperiencia(missaoAtiva.xpRecompensa);
+                carteiraJogador.moedas += missaoAtiva.moedasRecompensa;
+            }
+        }
+        atualizarInterface();
+    });
 }
 
-// Usando o item comprado para recuperar vida
-if (inventario.length > 0 && heroi.vida > 0) {
-    console.log("\n--- Abrindo Inventário ---");
-    let itemConsumido = inventario.pop();
-    console.log(itemConsumido.usar(heroi));
-    console.log(`Sua Vida final: ${heroi.vida}/${heroi.vidaMaxima}`);
+if (btnEspecial) {
+    btnEspecial.addEventListener("click", () => {
+        if (jogador.vida <= 0 || !monstro.estaVivo()) return;
+
+        let logEspecial = jogador.ataqueEspecial(monstro);
+        historicoDiv.innerHTML += `<p style="color: purple;">${logEspecial}</p>`;
+
+        if (monstro.estaVivo()) {
+            let logContraAtaque = monstro.atacar(jogador);
+            historicoDiv.innerHTML += `<p style="color: red;">${logContraAtaque}</p>`;
+        } else {
+            historicoDiv.innerHTML += `<p style="color: green;">🎉 Você derrotou o ${monstro.nome}!</p>`;
+            jogador.ganharExperiencia(monstro.xpRecompensa);
+            carteiraJogador.moedas += monstro.moedasRecompensa;
+        }
+        atualizarInterface();
+    });
 }
+
+if (btnDefender) {
+    btnDefender.addEventListener("click", () => {
+        if (jogador.vida <= 0 || !monstro.estaVivo()) return;
+        
+        let logDefesa = jogador.defender();
+        historicoDiv.innerHTML += `<p style="color: blue;">${logDefesa}</p>`;
+        
+        let logContraAtaque = monstro.atacar(jogador);
+        historicoDiv.innerHTML += `<p style="color: red;">${logContraAtaque}</p>`;
+        
+        // Remove o bônus temporário de defesa após o ataque do inimigo
+        jogador.defesa -= 10; 
+        atualizarInterface();
+    });
+}
+
+if (btnComprarArma) {
+    btnComprarArma.addEventListener("click", () => {
+        let resultado = lojaDoJogo.comprarArma(0, jogador, carteiraJogador); // Compra Espada Curta (índice 0)
+        historicoDiv.innerHTML += `<p style="color: gold;">${resultado}</p>`;
+        atualizarInterface();
+    });
+}
+
+if (btnUsarItem) {
+    btnUsarItem.addEventListener("click", () => {
+        if (inventarioJogador.length > 0) {
+            let item = inventarioJogador.pop();
+            let resultado = item.usar(jogador);
+            historicoDiv.innerHTML += `<p style="color: green;">${resultado}</p>`;
+        } else {
+            // Se o inventário estiver vazio, tenta comprar uma poção automaticamente se tiver dinheiro
+            if (carteiraJogador.moedas >= 10) {
+                lojaDoJogo.comprarItem(0, carteiraJogador, inventarioJogador); // Compra Poção de Vida P
+                let item = inventarioJogador.pop();
+                let resultado = item.usar(jogador);
+                historicoDiv.innerHTML += `<p style="color: green;">Comprou e usou: ${resultado}</p>`;
+            } else {
+                historicoDiv.innerHTML += `<p style="color: orange;">Sem poções no inventário e sem moedas para comprar!</p>`;
+            }
+        }
+        atualizarInterface();
+    });
+}
+
+// Inicializa o estado visual da tela no carregamento
+atualizarInterface();
