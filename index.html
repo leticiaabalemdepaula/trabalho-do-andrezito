@@ -1,3 +1,4 @@
+```html
 <!DOCTYPE html>
 <html lang="pt-BR">
 
@@ -15,6 +16,7 @@
 
     <h1>RPG Medieval</h1>
 
+    <!-- MENU -->
     <div id="menu">
 
         <h2>Crie seu Herói</h2>
@@ -27,17 +29,17 @@
         <div class="classes">
 
             <div class="classe" onclick="selecionarClasse('Guerreiro', this)">
-                <img src="guerreiro.jpeg" alt="Guerreiro">
+                <img src="guerreiro.png" alt="Guerreiro">
                 <h3>Guerreiro</h3>
             </div>
 
             <div class="classe" onclick="selecionarClasse('Mago', this)">
-                <img src="mago.jpeg" alt="Mago">
+                <img src="mago.png" alt="Mago">
                 <h3>Mago</h3>
             </div>
 
             <div class="classe" onclick="selecionarClasse('Arqueiro', this)">
-                <img src="arqueiro.jpeg" alt="Arqueiro">
+                <img src="arqueiro.png" alt="Arqueiro">
                 <h3>Arqueiro</h3>
             </div>
 
@@ -51,6 +53,43 @@
 
     <hr>
 
+    <!-- ÁREA DO JOGO -->
+    <div id="jogo" style="display:none;">
+
+        <div id="personagem">
+
+            <img id="imgJogador" src="" width="220">
+
+            <div class="barra">
+                <div id="vidaJogador"></div>
+            </div>
+
+        </div>
+
+        <div id="monstro">
+
+            <img id="imgMonstro" src="" width="180">
+
+            <div class="barra">
+                <div id="vidaMonstro"></div>
+            </div>
+
+        </div>
+
+    </div>
+
+    <br>
+
+    <div id="botoesJogo" style="display:none;">
+
+        <button id="btnAtacar">⚔ Atacar</button>
+
+        <button id="btnHabilidade">✨ Habilidade</button>
+
+    </div>
+
+    <br>
+
     <div id="saida"></div>
 
 </div>
@@ -63,7 +102,7 @@ const saida = document.getElementById("saida");
 
 const logOriginal = console.log;
 
-console.log = function (...mensagens){
+console.log = function(...mensagens){
 
     logOriginal(...mensagens);
 
@@ -71,7 +110,7 @@ console.log = function (...mensagens){
 
     saida.scrollTop = saida.scrollHeight;
 
-};
+}
 
 let classeEscolhida = "";
 
@@ -79,7 +118,7 @@ function selecionarClasse(classe, elemento){
 
     classeEscolhida = classe;
 
-    document.querySelectorAll(".classe").forEach(function(c){
+    document.querySelectorAll(".classe").forEach(c=>{
 
         c.classList.remove("selecionada");
 
@@ -89,51 +128,57 @@ function selecionarClasse(classe, elemento){
 
 }
 
-document.getElementById("iniciar").addEventListener("click", function(){
+document.getElementById("iniciar").addEventListener("click",function(){
 
-    const nome = document.getElementById("nome").value.trim();
+    const nome=document.getElementById("nome").value.trim();
 
-    if(nome === ""){
+    if(nome==""){
 
         alert("Digite o nome do personagem.");
+
         return;
 
     }
 
-    if(classeEscolhida === ""){
+    if(classeEscolhida==""){
 
         alert("Escolha uma classe.");
+
         return;
 
     }
 
     let jogador;
 
-    if(classeEscolhida === "Guerreiro"){
+    if(classeEscolhida=="Guerreiro"){
 
-        jogador = new Guerreiro(nome);
+        jogador=new Guerreiro(nome);
 
     }
 
-    else if(classeEscolhida === "Mago"){
+    else if(classeEscolhida=="Mago"){
 
-        jogador = new Mago(nome);
+        jogador=new Mago(nome);
 
     }
 
     else{
 
-        jogador = new Arqueiro(nome);
+        jogador=new Arqueiro(nome);
 
     }
 
-    const espada = new Arma("Espada de Ferro",8,50);
+    const espada=new Arma("Espada de Ferro",8,50);
 
     jogador.adicionarArma(espada);
 
     jogador.equiparArma(espada);
 
-    document.getElementById("menu").style.display = "none";
+    document.getElementById("menu").style.display="none";
+
+    document.getElementById("jogo").style.display="flex";
+
+    document.getElementById("botoesJogo").style.display="block";
 
     fase1(jogador);
 
@@ -143,3 +188,4 @@ document.getElementById("iniciar").addEventListener("click", function(){
 
 </body>
 </html>
+```
