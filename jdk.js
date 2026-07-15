@@ -1,781 +1,386 @@
-
-
+// ==========================================
+// 1. CLASSE BASE: PERSONAGEM
+// ==========================================
 class Personagem {
-
-    constructor(nome) {
-        if (new.target === Personagem) {
-            throw new Error("Personagem é uma classe abstrata.");
-        }
-
+    constructor(nome, vidaMaxima, vida, ataque, defesa, nivel, experiencia) {
         this.nome = nome;
-        this.vidaMaxima = 100;
-        this.vida = this.vidaMaxima;
-        this.ataque = 20;
-        this.defesa = 10;
-        this.nivel = 1;
-        this.experiencia = 0;
-        this.ouro = 100;
-
-        this.arma = null;
-        this.armas = [];
-        this.itens = [];
-    }
-
-
-    equiparArma(arma) {
-
-        if (this.arma != null) {
-            this.ataque -= this.arma.bonus;
-        }
-
-        this.arma = arma;
-        this.ataque += arma.bonus;
-
-        console.log(`${this.nome} equipou ${arma.nome}`);
-    }
-
-    atacar(monstro) {
-
-        let dano = this.ataque + Math.floor(Math.random() * 6);
-
-        // Chance crítica de 20%
-        if (Math.floor(Math.random() * 100) < 20) {
-
-            dano *= 2;
-
-            console.log(`⚡ ${this.nome} acertou um GOLPE CRÍTICO! ⚡`);
-        }
-
-        console.log(`${this.nome} atacou ${monstro.nome}`);
-
-        monstro.receberDano(dano);
-
+        this.vidaMaxima = vidaMaxima;
+        this.vida = vida;
+        this.ataque = ataque;
+        this.defesa = defesa;
+        this.nivel = nivel;
+        this.experiencia = experiencia;
+        this.armaEquipada = null;
     }
 
     receberDano(dano) {
-
-        dano -= this.defesa;
-
-        if (dano < 1) {
-            dano = 1;
-        }
-
-        this.vida -= dano;
-
-        if (this.vida < 0) {
-            this.vida = 0;
-        }
-
-        console.log(`${this.nome} recebeu ${dano} de dano.`);
-        console.log(`Vida restante: ${this.vida}/${this.vidaMaxima}`);
-
-        if (this.vida === 0) {
-            console.log(`💀 ${this.nome} foi derrotado!`);
-        }
-
+        let danoFinal = dano - this.defesa;
+        if (danoFinal < 0) danoFinal = 0;
+        this.vida -= danoFinal;
+        if (this.vida < 0) this.vida = 0;
+        return danoFinal;
     }
 
-    curar(valor) {
-
-        this.vida += valor;
-
-        if (this.vida > this.vidaMaxima) {
-            this.vida = this.vidaMaxima;
+    atacar(inimigo) {
+        let poderAtaque = this.ataque;
+        if (this.armaEquipada) {
+            poderAtaque += this.armaEquipada.bonusAtaque;
         }
-
-        console.log(`${this.nome} recuperou ${valor} de vida!`);
-        console.log(`Vida atual: ${this.vida}/${this.vidaMaxima}`);
-
+        let danoCausado = inimigo.receberDano(poderAtaque);
+        return `${this.nome} atacou ${inimigo.nome} e causou ${danoCausado} de dano!`;
     }
 
-    estaVivo() {
-        return this.vida > 0;
-    }
-
-    ganharXP(xp) {
-
+    ganharExperiencia(xp) {
         this.experiencia += xp;
-
-        while (this.experiencia >= 100) {
-
-            this.experiencia -= 100;
-
-            this.nivel++;
-
-            this.vidaMaxima += 20;
-            this.vida = this.vidaMaxima;
-
-            this.ataque += 5;
-            this.defesa += 3;
-
-            console.log("\n*** LEVEL UP ***");
-            console.log(`${this.nome} chegou ao nível ${this.nivel}`);
-            console.log(`❤️ Vida máxima aumentada para ${this.vidaMaxima}`);
-
+        let retorno = `${this.nome} ganhou ${xp} de XP!`;
+        if (this.experiencia >= this.nivel * 100) {
+            this.experiencia -= this.nivel * 100;
+            this.subirNivel();
+            retorno += `\n✨ ${this.nome} subiu para o nível ${this.nivel}!`;
         }
-
+        return retorno;
     }
 
-    adicionarArma(arma) {
-
-        this.armas.push(arma);
-
-        console.log(`${arma.nome} adicionada ao inventário!`);
-
+    subirNivel() {
+        this.nivel++;
+        this.vidaMaxima += 20;
+        this.vida = this.vidaMaxima;
+        this.ataque += 5;
+        this.defesa += 3;
     }
 
-    adicionarItem(item) {
+    equiparArma(arma) {
+        this.armaEquipada = arma;
+        return `${this.nome} equipou ${arma.nome}!`;
+    }
+}
 
-        this.itens.push(item);
-
-        console.log(`${item.nome} adicionado ao inventário!`);
-
+// ==========================================
+// 2. CLASSES DOS HERÓIS (Guerreiro, Mago, Arqueiro)
+// ==========================================
+class Guerreiro extends Personagem {
+    constructor(nome) {
+        super(nome, 150, 150, 25, 20, 1, 0);
+        this.classe = "Guerreiro";
+        this.energia = 100;
     }
 
-    mostrarInventario() {
-
-        console.log("\n===== INVENTÁRIO =====");
-        console.log(`💰 Ouro: ${this.ouro}`);
-
-        if (this.armas.length > 0) {
-
-            console.log("\n--- Armas ---");
-
-            for (let i = 0; i < this.armas.length; i++) {
-
-                console.log(
-                    `${i + 1}. ${this.armas[i].nome} (+${this.armas[i].bonus} ataque)`
-                );
-
-            }
-
+    ataqueEspecial(inimigo) {
+        if (this.energia >= 30) {
+            let dano = this.ataque * 2;
+            inimigo.receberDano(dano);
+            this.energia -= 30;
+            return `${this.nome} usou Golpe Poderoso causando ${dano} de dano!`;
+        } else {
+            return `${this.nome} não possui energia suficiente!`;
         }
+    }
 
-        if (this.itens.length > 0) {
+    defender() {
+        this.defesa += 10;
+        return `${this.nome} levantou o escudo e aumentou sua defesa temporariamente!`;
+    }
 
-            console.log("\n--- Itens ---");
-
-            for (let i = 0; i < this.itens.length; i++) {
-
-                console.log(
-                    `${i + 1}. ${this.itens[i].nome} (+${this.itens[i].valor} ${this.itens[i].tipo})`
-                );
-
-            }
-
-        }
-
+    recuperarEnergia() {
+        this.energia += 20;
+        if (this.energia > 100) this.energia = 100;
     }
 
     mostrarStatus() {
-
-        console.log("\n===== STATUS =====");
-
-        console.log(`Nome: ${this.nome}`);
-        console.log(`❤️ Vida: ${this.vida}/${this.vidaMaxima}`);
-        console.log(`⚔️ Ataque: ${this.ataque}`);
-        console.log(`🛡️ Defesa: ${this.defesa}`);
-        console.log(`⭐ Nível: ${this.nivel}`);
-        console.log(`📊 XP: ${this.experiencia}/100`);
-        console.log(`💰 Ouro: ${this.ouro}`);
-
-        if (this.arma != null) {
-
-            console.log(
-                `🗡️ Arma equipada: ${this.arma.nome} (+${this.arma.bonus})`
-            );
-
-        }
-
+        return `Nome: ${this.nome} | Classe: ${this.classe} | Nível: ${this.nivel}\n` +
+               `Vida: ${this.vida}/${this.vidaMaxima} | Energia: ${this.energia}/100\n` +
+               `Ataque: ${this.ataque} | Defesa: ${this.defesa} | XP: ${this.experiencia}`;
     }
-
-    habilidade() {
-
-        throw new Error("O método habilidade() deve ser implementado pela subclasse.");
-
-    }
-
-}
-
-class Guerreiro extends Personagem {
-
-    constructor(nome) {
-        super(nome);
-    }
-
-    habilidade() {
-
-        console.log(`⚔️ ${this.nome} usou Golpe Giratório!`);
-
-    }
-
 }
 
 class Mago extends Personagem {
-
     constructor(nome) {
-        super(nome);
+        super(nome, 100, 100, 30, 10, 1, 0);
+        this.classe = "Mago";
+        this.mana = 120;
+        this.manaMaxima = 120;
     }
 
-    habilidade() {
-        console.log(`🔥 ${this.nome} lançou Bola de Fogo!`);
+    ataqueEspecial(inimigo) {
+        if (this.mana >= 40) {
+            let dano = this.ataque * 2.5;
+            inimigo.receberDano(dano);
+            this.mana -= 40;
+            return `${this.nome} conjurou Bola de Fogo causando ${dano} de dano mágico!`;
+        } else {
+            return `${this.nome} não possui mana suficiente!`;
+        }
     }
 
+    curar() {
+        if (this.mana >= 25) {
+            let cura = 40;
+            this.vida += cura;
+            if (this.vida > this.vidaMaxima) this.vida = this.vidaMaxima;
+            this.mana -= 25;
+            return `${this.nome} usou Cura Divina e recuperou ${cura} de vida!`;
+        } else {
+            return `${this.nome} não tem mana para curar!`;
+        }
+    }
+
+    recuperarMana() {
+        this.mana += 25;
+        if (this.mana > this.manaMaxima) this.mana = this.manaMaxima;
+    }
+
+    mostrarStatus() {
+        return `Nome: ${this.nome} | Classe: ${this.classe} | Nível: ${this.nivel}\n` +
+               `Vida: ${this.vida}/${this.vidaMaxima} | Mana: ${this.mana}/${this.manaMaxima}\n` +
+               `Ataque: ${this.ataque} | Defesa: ${this.defesa} | XP: ${this.experiencia}`;
+    }
 }
 
 class Arqueiro extends Personagem {
-
     constructor(nome) {
-        super(nome);
+        super(nome, 120, 120, 28, 12, 1, 0);
+        this.classe = "Arqueiro";
+        this.foco = 100;
     }
 
-    habilidade() {
-        console.log(`🏹 ${this.nome} disparou Flecha Precisa!`);
+    ataqueEspecial(inimigo) {
+        if (this.foco >= 35) {
+            let dano = this.ataque * 2.2;
+            inimigo.receberDano(dano);
+            this.foco -= 35;
+            return `${this.nome} usou Flecha Perfurante causando ${dano} de dano!`;
+        } else {
+            return `${this.nome} não possui foco suficiente!`;
+        }
     }
 
+    concentrar() {
+        this.foco += 30;
+        if (this.foco > 100) this.foco = 100;
+        this.ataque += 2;
+        return `${this.nome} se concentrou, recuperando foco e aumentando levemente o ataque!`;
+    }
+
+    mostrarStatus() {
+        return `Nome: ${this.nome} | Classe: ${this.classe} | Nível: ${this.nivel}\n` +
+               `Vida: ${this.vida}/${this.vidaMaxima} | Foco: ${this.foco}/100\n` +
+               `Ataque: ${this.ataque} | Defesa: ${this.defesa} | XP: ${this.experiencia}`;
+    }
 }
 
+// ==========================================
+// 3. EQUIPAMENTOS E ITENS (Arma, Item, Loja)
+// ==========================================
 class Arma {
-
-    constructor(nome, bonus, preco) {
+    constructor(nome, bonusAtaque, preco) {
         this.nome = nome;
-        this.bonus = bonus;
+        this.bonusAtaque = bonusAtaque;
         this.preco = preco;
     }
-
-    getNome() {
-        return this.nome;
-    }
-
-    getBonus() {
-        return this.bonus;
-    }
-
-    getPreco() {
-        return this.preco;
-    }
-
 }
 
 class Item {
-
-    constructor(nome, valor, tipo) {
+    constructor(nome, tipo, efeito, valorEfeito, preco) {
         this.nome = nome;
-        this.valor = valor;
-        this.tipo = tipo; // "vida" ou "ataque"
+        this.tipo = tipo; // "Cura", "Mana" ou "Energia"
+        this.efeito = efeito; 
+        this.valorEfeito = valorEfeito;
+        this.preco = preco;
     }
 
-    getNome() {
-        return this.nome;
-    }
+    usar(personagem) {
+        if (this.tipo === "Cura") {
+            personagem.vida += this.valorEfeito;
+            if (personagem.vida > personagem.vidaMaxima) {
+                personagem.vida = personagem.vidaMaxima;
+            }
+            return `${personagem.nome} usou ${this.nome} e recuperou ${this.valorEfeito} de vida!`;
+        }
+        
+        if (this.tipo === "Mana" && personagem.classe === "Mago") {
+            personagem.mana += this.valorEfeito;
+            if (personagem.mana > personagem.manaMaxima) {
+                personagem.mana = personagem.manaMaxima;
+            }
+            return `${personagem.nome} usou ${this.nome} e recuperou ${this.valorEfeito} de mana!`;
+        }
 
-    getValor() {
-        return this.valor;
-    }
+        if (this.tipo === "Energia" && personagem.classe === "Guerreiro") {
+            personagem.energia += this.valorEfeito;
+            if (personagem.energia > 100) personagem.energia = 100;
+            return `${personagem.nome} usou ${this.nome} e recuperou ${this.valorEfeito} de energia!`;
+        }
 
-getTipo() {
-    return this.tipo;
- }
+        return `${this.nome} não fez efeito no ${personagem.nome}.`;
+    }
 }
 
 class Loja {
-
     constructor() {
+        this.armasDisponiveis = [
+            new Arma("Espada Curta", 5, 20),
+            new Arma("Cajado Elemental", 8, 35),
+            new Arma("Arco Composto", 6, 25),
+            new Arma("Excalibur", 20, 100)
+        ];
 
-        this.armasDisponiveis = [];
-        this.itensDisponiveis = [];
-
-        // Adicionando armas
-        this.armasDisponiveis.push(new Arma("Espada de Ferro", 8, 50));
-        this.armasDisponiveis.push(new Arma("Machado de Batalha", 12, 80));
-        this.armasDisponiveis.push(new Arma("Cajado Mágico", 15, 120));
-
-        // Adicionando itens
-        this.itensDisponiveis.push(new Item("Poção de Vida Pequena", 20, "vida"));
-        this.itensDisponiveis.push(new Item("Poção de Vida Grande", 50, "vida"));
-        this.itensDisponiveis.push(new Item("Poção de Ataque", 10, "ataque"));
-
+        this.itensDisponiveis = [
+            new Item("Poção de Vida P", "Cura", "Cura Vida", 30, 10),
+            new Item("Poção de Vida G", "Cura", "Cura Vida", 80, 25),
+            new Item("Poção de Mana", "Mana", "Recupera Mana", 40, 15)
+        ];
     }
 
-    mostrarItens(personagem) {
-
-        console.log("\n===== LOJA =====");
-        console.log(`💰 Seu ouro: ${personagem.ouro}`);
-
-        console.log("\n--- Armas ---");
-
-        for (let i = 0; i < this.armasDisponiveis.length; i++) {
-
-            const arma = this.armasDisponiveis[i];
-
-            console.log(
-                `${i + 1}. ${arma.getNome()} (+${arma.getBonus()} ataque) - ${arma.getPreco()} ouros`
-            );
-
-        }
-
-        console.log("\n--- Itens ---");
-
-        for (let i = 0; i < this.itensDisponiveis.length; i++) {
-
-            const item = this.itensDisponiveis[i];
-
-            console.log(
-                `${i + 1 + this.armasDisponiveis.length}. ${item.getNome()} (+${item.getValor()} ${item.getTipo()}) - 20 ouros`
-            );
-
-        }
-
+    mostrarProdutos() {
+        let catalogo = "=== LOJA DO REINO ===\n--- Armas ---\n";
+        this.armasDisponiveis.forEach((a, i) => {
+            catalogo += `[A${i}] ${a.nome} (+${a.bonusAtaque} Atq) - Preço: ${a.preco} moedas\n`;
+        });
+        catalogo += "\n--- Consumíveis ---\n";
+        this.itensDisponiveis.forEach((item, i) => {
+            catalogo += `[I${i}] ${item.nome} (${item.tipo}: +${item.valorEfeito}) - Preço: ${item.preco} moedas\n`;
+        });
+        return catalogo;
     }
 
-    comprar(personagem, opcao) {
-
-        // Comprar arma
-        if (opcao >= 1 && opcao <= this.armasDisponiveis.length) {
-
-            const arma = this.armasDisponiveis[opcao - 1];
-
-            if (personagem.ouro >= arma.getPreco()) {
-
-                personagem.ouro -= arma.getPreco();
-
-                personagem.adicionarArma(arma);
-
-                console.log("✅ Compra realizada com sucesso!");
-
-            } else {
-
-                console.log("❌ Ouro insuficiente!");
-
-            }
-
+    comprarArma(indice, personagem, carteira) {
+        let arma = this.armasDisponiveis[indice];
+        if (arma && carteira.moedas >= arma.preco) {
+            carteira.moedas -= arma.preco;
+            personagem.equiparArma(arma);
+            return `Sucesso! Você comprou e equipou: ${arma.nome}.`;
         }
-
-        // Comprar item
-        else if (
-            opcao > this.armasDisponiveis.length &&
-            opcao <= this.armasDisponiveis.length + this.itensDisponiveis.length
-        ) {
-
-            const item = this.itensDisponiveis[
-                opcao - this.armasDisponiveis.length - 1
-            ];
-
-            if (personagem.ouro >= 20) {
-
-                personagem.ouro -= 20;
-
-                personagem.adicionarItem(item);
-
-                console.log("✅ Compra realizada com sucesso!");
-
-            } else {
-
-                console.log("❌ Ouro insuficiente!");
-
-            }
-
-        }
-
-        else {
-
-            console.log("❌ Opção inválida!");
-
-        }
-
+        return "Moedas insuficientes ou item inválido!";
     }
 
+    comprarItem(indice, carteira, inventario) {
+        let item = this.itensDisponiveis[indice];
+        if (item && carteira.moedas >= item.preco) {
+            carteira.moedas -= item.preco;
+            inventario.push(item);
+            return `Sucesso! Você comprou e guardou: ${item.nome}.`;
+        }
+        return "Moedas insuficientes ou item inválido!";
+    }
 }
 
-
+// ==========================================
+// 4. INIMIGOS E OBJETIVOS (Monstro, Missão)
+// ==========================================
 class Monstro {
-
-    constructor(nome, vida, ataque, defesa, xpRecompensa, ouroRecompensa) {
-
+    constructor(nome, vidaMaxima, ataque, defesa, xpRecompensa, moedasRecompensa) {
         this.nome = nome;
-        this.vidaMaxima = vida;
-        this.vida = this.vidaMaxima;
+        this.vidaMaxima = vidaMaxima;
+        this.vida = vidaMaxima;
         this.ataque = ataque;
         this.defesa = defesa;
         this.xpRecompensa = xpRecompensa;
-        this.ouroRecompensa = ouroRecompensa;
-
-    }
-
-    atacar(personagem) {
-
-        let dano = this.ataque + Math.floor(Math.random() * 4);
-
-        // Chance de erro (10%)
-        if (Math.floor(Math.random() * 100) < 10) {
-
-            console.log(`${this.nome} errou o ataque!`);
-            return;
-
-        }
-
-        console.log(`${this.nome} atacou ${personagem.nome}`);
-
-        personagem.receberDano(dano);
-
+        this.moedasRecompensa = moedasRecompensa;
     }
 
     receberDano(dano) {
+        let danoFinal = dano - this.defesa;
+        if (danoFinal < 0) danoFinal = 0;
+        this.vida -= danoFinal;
+        if (this.vida < 0) this.vida = 0;
+        return danoFinal;
+    }
 
-        dano -= this.defesa;
-
-        if (dano < 1) {
-            dano = 1;
-        }
-
-        this.vida -= dano;
-
-        if (this.vida < 0) {
-            this.vida = 0;
-        }
-
-        console.log(`${this.nome} perdeu ${dano} de vida.`);
-        console.log(`Vida restante: ${this.vida}/${this.vidaMaxima}`);
-
-        if (this.vida === 0) {
-
-            console.log(`💀 ${this.nome} foi derrotado!`);
-
-        }
-
+    atacar(jogador) {
+        let danoCausado = jogador.receberDano(this.ataque);
+        return `${this.nome} contra-atacou ${jogador.nome} causando ${danoCausado} de dano!`;
     }
 
     estaVivo() {
         return this.vida > 0;
     }
-
-    getNome() {
-        return this.nome;
-    }
-
-    getAtaque() {
-        return this.ataque;
-    }
-
-    getVida() {
-        return this.vida;
-    }
-
-    getXpRecompensa() {
-        return this.xpRecompensa;
-    }
-
-    getOuroRecompensa() {
-        return this.ouroRecompensa;
-    }
-
 }
-
 
 class Missao {
-
-    constructor(descricao, recompensaXP, recompensaOuro) {
-
+    constructor(titulo, descricao, xpRecompensa, moedasRecompensa, monstrosNecessarios) {
+        this.titulo = titulo;
         this.descricao = descricao;
-        this.recompensaXP = recompensaXP;
-        this.recompensaOuro = recompensaOuro;
-
+        this.xpRecompensa = xpRecompensa;
+        this.moedasRecompensa = moedasRecompensa;
+        this.monstrosNecessarios = monstrosNecessarios;
+        this.progresso = 0;
+        this.completada = false;
     }
 
-    concluir(personagem) {
-
-        console.log("\n📋 Missão concluída!");
-        console.log(this.descricao);
-        console.log(
-            `🏆 Recompensa: ${this.recompensaXP} XP e ${this.recompensaOuro} ouros`
-        );
-
-        if (personagem.estaVivo()) {
-
-            personagem.ganharXP(this.recompensaXP);
-            personagem.ouro += this.recompensaOuro;
-
-        } else {
-
-            console.log("❌ Personagem está derrotado! Não pode receber recompensa.");
-
+    registrarAbate() {
+        if (!this.completada) {
+            this.progresso++;
+            if (this.progresso >= this.monstrosNecessarios) {
+                this.completada = true;
+                return `\n🏆 Missão "${this.titulo}" concluída!`;
+            }
         }
-
+        return "";
     }
-
 }
 
+// ==========================================
+// 5. SIMULAÇÃO E EXECUÇÃO DO JOGO (Main)
+// ==========================================
+const carteira = { moedas: 50 };
+const inventario = [];
+const loja = new Loja();
 
-function main() {
+// Escolha o herói instanciando a classe desejada:
+const heroi = new Guerreiro("Thorin"); 
 
-    const jogador = new Guerreiro("Arthur");
+console.log(`--- SEJA BEM-VINDO AO REINO DE JS ---`);
+console.log(heroi.mostrarStatus());
+console.log(`Moedas iniciais: ${carteira.moedas}\n`);
 
-    // Criando arma inicial
-    const espada = new Arma("Espada de Ferro", 8, 50);
+// Aceitando uma missão
+const missaoPrincipal = new Missao("Expurgo de Goblins", "Derrote 2 Goblins para proteger a vila", 50, 30, 2);
+console.log(`📜 Nova missão ativa: "${missaoPrincipal.titulo}" - Recompensa: ${missaoPrincipal.moedasRecompensa} Moedas.`);
 
-    jogador.adicionarArma(espada);
-    jogador.equiparArma(espada);
+// Passando na Loja
+console.log("\n" + loja.mostrarProdutos());
+console.log(loja.comprarArma(0, heroi, carteira));   // Compra 'Espada Curta'
+console.log(loja.comprarItem(0, carteira, inventario)); // Compra 'Poção de Vida P'
+console.log(`Moedas restantes: ${carteira.moedas}\n`);
 
-    // Criando monstros
-    const slime = new Monstro("Slime", 30, 5, 2, 30, 10);
-    const goblin = new Monstro("Goblin", 50, 8, 3, 40, 20);
-    const lobo = new Monstro("Lobo Selvagem", 60, 12, 4, 50, 30);
+// Combate contra Goblin 1
+let goblin = new Monstro("Goblin Saqueador", 40, 15, 5, 40, 15);
+console.log(`⚔️ Um ${goblin.nome} selvagem apareceu!`);
 
-    jogador.mostrarStatus();
-    jogador.habilidade();
+while (goblin.estaVivo() && heroi.vida > 0) {
+    // Turno do Jogador (Ataque Especial)
+    console.log(heroi.ataqueEspecial(goblin));
+    console.log(`Vida do ${goblin.nome}: ${goblin.vida}/${goblin.vidaMaxima}`);
 
-
-    console.log("\n=== BATALHA 1 ===");
-
-    while (jogador.estaVivo() && slime.estaVivo()) {
-
-        jogador.atacar(slime);
-
-        if (slime.estaVivo()) {
-            slime.atacar(jogador);
-        }
-
+    if (goblin.estaVivo()) {
+        // Turno do Goblin
+        console.log(goblin.atacar(heroi));
+        console.log(`Sua Vida: ${heroi.vida}/${heroi.vidaMaxima}\n`);
     }
-
-    if (jogador.estaVivo()) {
-
-        jogador.ouro += slime.getOuroRecompensa();
-
-        const missao1 = new Missao(
-            "Eliminar o Slime",
-            slime.getXpRecompensa(),
-            slime.getOuroRecompensa()
-        );
-
-        missao1.concluir(jogador);
-
-    }
-
-    jogador.mostrarStatus();
-
-    console.log("\n=== BATALHA 2 ===");
-
-    while (jogador.estaVivo() && goblin.estaVivo()) {
-
-        jogador.atacar(goblin);
-
-        if (goblin.estaVivo()) {
-            goblin.atacar(jogador);
-        }
-
-    }
-
-    if (jogador.estaVivo()) {
-
-        jogador.ouro += goblin.getOuroRecompensa();
-
-        const missao2 = new Missao(
-            "Derrotar o Goblin",
-            goblin.getXpRecompensa(),
-            goblin.getOuroRecompensa()
-        );
-
-        missao2.concluir(jogador);
-
-    }
-
-    jogador.mostrarStatus();
-
-
-    console.log("\n=== BATALHA 3 ===");
-
-    while (jogador.estaVivo() && lobo.estaVivo()) {
-
-        jogador.atacar(lobo);
-
-        if (lobo.estaVivo()) {
-            lobo.atacar(jogador);
-        }
-
-    }
-
-    if (jogador.estaVivo()) {
-
-        jogador.ouro += lobo.getOuroRecompensa();
-
-        const missao3 = new Missao(
-            "Caçar o Lobo Selvagem",
-            lobo.getXpRecompensa(),
-            lobo.getOuroRecompensa()
-        );
-
-        missao3.concluir(jogador);
-
-    }
-
-    jogador.mostrarStatus();
-
-    jogador.mostrarInventario();
-
-   
-
-    console.log("\n=== USANDO POÇÃO ===");
-
-    jogador.curar(30);
-
-
-
-    const loja = new Loja();
-
-    loja.mostrarItens(jogador);
-
-    console.log("\nFim do jogo!");
-
-}// ==========================
-// FASE 1 - Floresta Sombria
-// ==========================
-
-function fase1(jogador){
-
-    jogadorAtual = jogador;
-
-    monstroAtual = new Monstro("Slime",30,5,2,30,10);
-
-    document.getElementById("imgMonstro").src="img/slime.png";
-
-    if(jogador instanceof Guerreiro){
-
-        document.getElementById("imgJogador").src="img/guerreiro.png";
-
-    }
-
-    else if(jogador instanceof Mago){
-
-        document.getElementById("imgJogador").src="img/mago.png";
-
-    }
-
-    else{
-
-        document.getElementById("imgJogador").src="img/arqueiro.png";
-
-    }
-
-    atualizarBarras();
-
-    console.log("⚔ Um Slime apareceu!");
 }
 
-function atualizarBarras(){
-
-    document.getElementById("vidaJogador").style.width=
-
-    (jogadorAtual.vida/jogadorAtual.vidaMaxima*100)+"%";
-
-    document.getElementById("vidaMonstro").style.width=
-
-    (monstroAtual.vida/monstroAtual.vidaMaxima*100)+"%";
-
-}
-// ==========================
-// BOTÃO INICIAR
-// ==========================
-
-const botao = document.getElementById("iniciar");
-
-botao.addEventListener("click", function () {
-
-    this.disabled = true;
-
-    const nome = document.getElementById("nome").value;
-    const classe = document.querySelector('input[name="classe"]:checked').value;
-
-    let jogador;
-
-    if (classe === "guerreiro") {
-        jogador = new Guerreiro(nome);
-    } else if (classe === "mago") {
-        jogador = new Mago(nome);
-    } else {
-        jogador = new Arqueiro(nome);
+// Pós-combate
+if (heroi.vida > 0) {
+    console.log(`🎉 Você derrotou o ${goblin.nome}!`);
+    console.log(heroi.ganharExperiencia(goblin.xpRecompensa));
+    carteira.moedas += goblin.moedasRecompensa;
+    console.log(`Moedas recebidas: ${goblin.moedasRecompensa}. Saldo: ${carteira.moedas}`);
+    
+    // Registra progresso na missão
+    let avisoMissao = missaoPrincipal.registrarAbate();
+    if (avisoMissao) {
+        console.log(avisoMissao);
+        heroi.ganharExperiencia(missaoPrincipal.xpRecompensa);
+        carteira.moedas += missaoPrincipal.moedasRecompensa;
     }
-
-    const espada = new Arma("Espada de Ferro", 8, 50);
-
-    jogador.adicionarArma(espada);
-    jogador.equiparArma(espada);
-
-    fase1(jogador);
-   //=========================
-// VARIÁVEIS
-//=========================
-
-let jogadorAtual;
-let monstroAtual;
-
-//=========================
-// FASE 1
-//=========================
-
-function fase1(jogador){
-
-    jogadorAtual = jogador;
-
-    monstroAtual = new Monstro("Slime",30,5,2,30,10);
-
-    if(jogador instanceof Guerreiro){
-        document.getElementById("imgJogador").src="img/guerreiro.png";
-    }
-    else if(jogador instanceof Mago){
-        document.getElementById("imgJogador").src="img/mago.png";
-    }
-    else{
-        document.getElementById("imgJogador").src="img/arqueiro.png";
-    }
-
-    document.getElementById("imgMonstro").src="img/slime.png";
-
-    atualizarBarras();
-
-    console.log("==================================");
-    console.log("FLORESTA SOMBRIA");
-    console.log("==================================");
-    console.log("⚔ Um Slime apareceu!");
+} else {
+    console.log("\n💀 Você foi derrotado! Fim de jogo.");
 }
 
-//=========================
-// BARRAS
-//=========================
-
-function atualizarBarras(){
-
-    document.getElementById("vidaJogador").style.width =
-    (jogadorAtual.vida/jogadorAtual.vidaMaxima*100)+"%";
-
-    document.getElementById("vidaMonstro").style.width =
-    (monstroAtual.vida/monstroAtual.vidaMaxima*100)+"%";
-
+// Usando o item comprado para recuperar vida
+if (inventario.length > 0 && heroi.vida > 0) {
+    console.log("\n--- Abrindo Inventário ---");
+    let itemConsumido = inventario.pop();
+    console.log(itemConsumido.usar(heroi));
+    console.log(`Sua Vida final: ${heroi.vida}/${heroi.vidaMaxima}`);
 }
-
-//=========================
-// BOTÃO ATACAR
-//=========================
-
-document.getElementById("btnAtacar").onclick=function(){
-
-    if(!jogadorAtual.estaVivo()) return;
-
-    if(!monstroAtual.estaVivo()) return;
-
-    jogadorAtual.atacar(monstroAtual);
-
-    atualizarBarras();
-
-    if(monstroAtual.estaVivo()){
-
-        monstroAtual.atacar(jogadorAtual);
-
-        atualizarBarras();
-
-    }else{
-
-        console.log("🏆 Você derrotou o Slime!");
-
-    }
-
-};
