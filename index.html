@@ -6,50 +6,34 @@
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
-<script src="jdk.js">java</script>
-<script src="Personagem.js"></script>
-<script src="Guerreiro.js"></script>
-<script src="Mago.js"></script>
-<script src="Arqueiro.js"></script>
-<script src="Arma.js"></script>
-<script src="Item.js"></script>
-<script src="Loja.js"></script>
-<script src="Monstro.js"></script>
-<script src="Missao.js"></script>
-<script src="Main.js"></script>
-
+<script src="jdk.js"></script>
 <div class="container">
+<button id="iniciar">▶ Iniciar Aventura</button>
+
+<div id="saida"></div>
 
     <h1> RPG Medieval </h1>
+</div> 
 
-    <button id="btnJogar" onclick="window.location.href'jdk.js'">▶ Iniciar Aventura</button>
+   
 
-    <pre id="saida"></pre>
-</div>
+<script src="jdk.js"></script>
 
-<script src="Main.js"></script>
+<script>
+const saida = document.getElementById("saida");
 
-    <script>
-        // Mostra o console dentro da página
-        const saida = document.getElementById("saida");
+const logOriginal = console.log;
 
-        const logOriginal = console.log;
+console.log = function (...mensagens) {
+    logOriginal(...mensagens);
+    saida.innerHTML += mensagens.join(" ") + "<br>";
+};
 
-        console.log = function (...mensagens) {
-            logOriginal(...mensagens);
-
-            saida.innerHTML += mensagens.join(" ") + "<br>";
-            saida.scrollTop = saida.scrollHeight;
-        };
-
-        // Botão iniciar
-        document.getElementById("btnIniciar").addEventListener("click", function () {
-
-            this.disabled = true;
-
-            main();
-
-        });
+document.getElementById("iniciar").addEventListener("click", function () {
+    this.disabled = true;
+    main();
+});
+</script>
     </script>
 </body>
 </html>
