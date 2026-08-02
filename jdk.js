@@ -1,8 +1,6 @@
-// --- ESTADO DO JOGADOR ---
 let player = {
     nome: "", classe: "", 
-    hp: 100, maxHp: 100, 
-    mp: 50, maxMp: 50,
+    hp: 100, maxHp: 100, mp: 50, maxMp: 50,
     dano: 10, ouro: 100, pocoes: 0,
     nivel: 1, xp: 0, xpNecessario: 100, imagem: "",
     faseAtual: 1, abatesNaFase: 0 
@@ -10,7 +8,6 @@ let player = {
 
 let enemy = { nome: "", categoria: "", hp: 0, maxHp: 0, dano: 0, recompensaOuro: 0, recompensaXp: 0, imagem: "", isBoss: false };
 
-// --- BANCO DE FASES ---
 const bancoDeFases = {
     1: { titulo: "Fase 1: Floresta Sombria", descricao: "A mata é tão fechada que a luz do sol mal consegue passar.", fundo: "url('https://images.unsplash.com/photo-1542259009477-d625272157b7?q=80&w=1920&auto=format&fit=crop')", inimigos: [{ nome: "Lobo Selvagem", categoria: "🍃 Fera Natural", hp: 30, maxHp: 30, dano: 5, recompensaOuro: 15, recompensaXp: 15, imagem: "https://images.unsplash.com/photo-1590424753858-3c6d1b400120?auto=format&fit=crop&w=200&q=80" }, { nome: "Goblin Saqueador", categoria: "👺 Goblinóide", hp: 45, maxHp: 45, dano: 8, recompensaOuro: 35, recompensaXp: 28, imagem: "https://images.unsplash.com/photo-1607604276583-eef5d076aa5f?auto=format&fit=crop&w=200&q=80" }], boss: { nome: "Espírito Ancestral", categoria: "🔥 BOSS DA FLORESTA", hp: 120, maxHp: 120, dano: 15, recompensaOuro: 150, recompensaXp: 120, isBoss: true, imagem: "https://images.unsplash.com/photo-1559103444-2453e1be4bf2?auto=format&fit=crop&w=200&q=80" } },
     2: { titulo: "Fase 2: Cavernas Profundas", descricao: "Um labirinto de pedra úmida. O ar cheira a enxofre.", fundo: "url('https://images.unsplash.com/photo-1599368535287-2dc01f56fc0e?q=80&w=1920&auto=format&fit=crop')", inimigos: [{ nome: "Morcego Vampiro", categoria: "🦇 Fera", hp: 90, maxHp: 90, dano: 16, recompensaOuro: 60, recompensaXp: 55, imagem: "https://images.unsplash.com/photo-1518930030584-1845184fb2b6?auto=format&fit=crop&w=200&q=80" }, { nome: "Golem", categoria: "💎 Elemental", hp: 130, maxHp: 130, dano: 22, recompensaOuro: 85, recompensaXp: 75, imagem: "https://images.unsplash.com/photo-1509248961158-e54f6934749c?auto=format&fit=crop&w=200&q=80" }], boss: { nome: "Rei Dragão", categoria: "🔥 BOSS DA CAVERNA", hp: 280, maxHp: 280, dano: 35, recompensaOuro: 350, recompensaXp: 300, isBoss: true, imagem: "https://images.unsplash.com/photo-1614023349208-16bd40d5885c?auto=format&fit=crop&w=200&q=80" } },
@@ -19,10 +16,13 @@ const bancoDeFases = {
 
 const imagensClasses = { "Guerreiro": "https://images.unsplash.com/photo-1558591710-4b4a1ae0f04d?auto=format&fit=crop&w=200&q=80", "Mago": "https://images.unsplash.com/photo-1519074002996-a69e7ac46a42?auto=format&fit=crop&w=200&q=80", "Arqueiro": "https://images.unsplash.com/photo-1511071353536-40742129525c?auto=format&fit=crop&w=200&q=80" };
 
-// --- SISTEMA DE SAVE (LOCAL STORAGE) ---
 function salvarJogo() {
-    localStorage.setItem("rpg_save", JSON.stringify(player));
-    adicionarAoLog(`💾 <em>Progresso salvo automaticamente!</em>`);
+    try {
+        localStorage.setItem("rpg_save", JSON.stringify(player));
+        adicionarAoLog(`💾 <em>Progresso salvo!</em>`);
+    } catch (e) {
+        console.log("Save desativado devido a restrições do navegador.");
+    }
 }
 
 function carregarJogo() {
@@ -32,11 +32,10 @@ function carregarJogo() {
         prepararInterfaceJogo();
         adicionarAoLog(`Bem-vindo de volta, ${player.nome}!`);
     } else {
-        alert("Nenhum jogo salvo encontrado no navegador!");
+        alert("Nenhum jogo salvo encontrado!");
     }
 }
 
-// --- INICIALIZAÇÃO ---
 function iniciarJogo() {
     player.nome = document.getElementById("char-name").value.trim() || "Herói Anônimo";
     player.classe = document.getElementById("char-class").value;
@@ -48,7 +47,7 @@ function iniciarJogo() {
     player.hp = player.maxHp;
     player.mp = player.maxMp;
     player.imagem = imagensClasses[player.classe];
-    player.pocoes = 1; // Começa com 1 poção
+    player.pocoes = 1;
     player.faseAtual = 1;
     player.nivel = 1;
     player.xp = 0;
@@ -80,7 +79,6 @@ function atualizarAmbienteFase() {
     document.getElementById("ambient-title").innerHTML = `<strong>${dados.titulo}</strong> - ${dados.descricao}`;
 }
 
-// --- INIMIGOS E DIFICULDADE ---
 function definirInimigo(dados) {
     let ciclos = Math.floor(player.nivel / 5);
     let mult = 1 + (ciclos * 0.5); 
@@ -103,8 +101,6 @@ function proximoInimigo(inicio = false) {
     else { alvo = dados.inimigos[Math.floor(Math.random() * dados.inimigos.length)]; if (!inicio) adicionarAoLog(`👣 Inimigo surgiu: <strong>${alvo.nome}</strong>!`); }
 
     definirInimigo(alvo);
-
-    // Recupera um pouco de MP a cada monstro novo
     player.mp = Math.min(player.maxMp, player.mp + 10);
 
     document.getElementById("next-enemy-btn").classList.add("hidden");
@@ -113,14 +109,13 @@ function proximoInimigo(inicio = false) {
     atualizarPainelVisual();
 }
 
-// --- SISTEMA DE COMBATE E MAGIA ---
 function atacar() { executarTurno(player.dano, "atacou"); }
 
 function atacarEspecial() {
     if (player.mp >= 20) {
         player.mp -= 20;
-        let danoEspecial = Math.floor(player.dano * 2.5); // 2.5x o dano base
-        executarTurno(danoEspecial, "usou MAGIA especial e esmagou");
+        let danoEspecial = Math.floor(player.dano * 2.5);
+        executarTurno(danoEspecial, "usou MAGIA especial em");
     } else {
         adicionarAoLog(`⚠️ Você não tem Mana (MP) suficiente! (Custa 20)`);
     }
@@ -132,7 +127,7 @@ function executarTurno(danoJogador, textoAcao) {
     enemy.hp -= danoJogador;
     if (enemy.hp < 0) enemy.hp = 0;
     animarDanoCard("enemy-card");
-    adicionarAoLog(`💥 Você ${textoAcao} o ${enemy.nome} com <span style="color: #ef4444;">${danoJogador} de dano</span>!`);
+    adicionarAoLog(`💥 Você ${textoAcao} ${enemy.nome} causando <span style="color: #ef4444;">${danoJogador} dano</span>!`);
     atualizarPainelVisual();
 
     if (enemy.hp <= 0) {
@@ -154,7 +149,7 @@ function executarTurno(danoJogador, textoAcao) {
             document.getElementById("btn-atacar").disabled = false;
             document.getElementById("btn-especial").disabled = false;
 
-            if (player.hp <= 0) adicionarAoLog(`<span style="color: #ef4444; font-weight: bold;">☠️ FIM DE JOGO! Recarregue a página para tentar novamente.</span>`);
+            if (player.hp <= 0) adicionarAoLog(`<span style="color: #ef4444; font-weight: bold;">☠️ FIM DE JOGO! Recarregue a página.</span>`);
         }
     }, 500); 
 }
@@ -162,14 +157,14 @@ function executarTurno(danoJogador, textoAcao) {
 function usarPocao() {
     if (player.pocoes > 0 && player.hp < player.maxHp) {
         player.pocoes--;
-        let cura = Math.floor(player.maxHp * 0.4); // Cura 40%
+        let cura = Math.floor(player.maxHp * 0.4);
         player.hp = Math.min(player.maxHp, player.hp + cura);
         adicionarAoLog(`🧪 Você bebeu uma poção e curou <span style="color:#22c55e;">${cura} HP</span>!`);
         atualizarPainelVisual();
     } else if (player.hp >= player.maxHp) {
         adicionarAoLog(`⚠️ Sua saúde já está cheia!`);
     } else {
-        adicionarAoLog(`⚠️ Você não tem poções! Compre na loja.`);
+        adicionarAoLog(`⚠️ Você não tem poções!`);
     }
 }
 
@@ -194,10 +189,9 @@ function processarVitoria() {
         }
     } else { player.abatesNaFase++; }
 
-    salvarJogo(); // Salva automaticamente ao vencer
+    salvarJogo(); 
 }
 
-// --- PROGRESSÃO E LOJA ---
 function ganharExperiencia(qtd) {
     player.xp += qtd;
     while (player.xp >= player.xpNecessario) {
@@ -223,8 +217,7 @@ function atualizarPrateleiraLoja() {
                   player.classe === "Mago" ? [{n: "👘 Manto (+20 Max HP)", c: 35, t: "hp", v: 20}, {n: "🔮 Grimório (+12 Dano)", c: 65, t: "dano", v: 12}] : 
                   [{n: "👢 Botas (+25 Max HP)", c: 35, t: "hp", v: 25}, {n: "🏹 Arco (+9 Dano)", c: 55, t: "dano", v: 9}];
 
-    // Adiciona Poção de Cura fixa para todas as classes
-    itens.push({n: "🧪 Poção de Cura (Mochila)", c: 25, t: "pocao", v: 1});
+    itens.push({n: "🧪 Poção de Cura", c: 25, t: "pocao", v: 1});
 
     itens.forEach(i => {
         let btn = document.createElement("button");
@@ -239,7 +232,7 @@ function atualizarPrateleiraLoja() {
                 
                 adicionarAoLog(`🛍️ Comprou <strong>${i.n}</strong>!`);
                 atualizarPainelVisual();
-                salvarJogo(); // Salva após comprar
+                salvarJogo(); 
             } else adicionarAoLog(`⚠️ Ouro insuficiente!`);
         };
         container.appendChild(btn);
