@@ -6,20 +6,13 @@ body {
     align-items: center;
     padding: 20px;
     margin: 0;
-    
-    /* Fundo padrão que será atualizado dinamicamente via JavaScript */
     background-color: #070a08;
     background-size: cover;          
     background-position: center;     
     background-attachment: fixed;    
 }
 
-h1 {
-    color: #4ade80;
-    text-shadow: 2px 2px 5px #000;
-    margin-bottom: 5px;
-    z-index: 10;
-}
+h1 { color: #4ade80; text-shadow: 2px 2px 5px #000; margin-bottom: 5px; z-index: 10; }
 
 .container {
     background-color: rgba(22, 34, 24, 0.95);
@@ -27,108 +20,37 @@ h1 {
     border-radius: 12px;
     box-shadow: 0 10px 25px rgba(0,0,0,0.8);
     width: 100%;
-    max-width: 720px;
+    max-width: 760px;
     text-align: center;
     border: 1px solid #2e4a32;
     backdrop-filter: blur(5px);
 }
 
 .ambient-text {
-    color: #86efac;
-    font-size: 14px;
-    margin-bottom: 20px;
-    background-color: rgba(0,0,0,0.6);
-    padding: 10px;
-    border-radius: 6px;
-    border-left: 3px solid #22c55e;
+    color: #86efac; font-size: 14px; margin-bottom: 20px; background-color: rgba(0,0,0,0.6);
+    padding: 10px; border-radius: 6px; border-left: 3px solid #22c55e;
 }
 
-.input-group {
-    margin: 15px 0;
-    text-align: left;
-}
-
-label {
-    display: block;
-    margin-bottom: 8px;
-    font-weight: bold;
-    color: #4ade80;
-}
-
-input, select {
-    width: 100%;
-    padding: 12px;
-    border-radius: 6px;
-    border: 1px solid #27422b;
-    font-size: 16px;
-    background-color: #1f3523;
-    color: #e2f7e2;
-    box-sizing: border-box;
-}
-
-input:focus, select:focus {
-    outline: none;
-    border-color: #4ade80;
-}
+.input-group { margin: 15px 0; text-align: left; }
+label { display: block; margin-bottom: 8px; font-weight: bold; color: #4ade80; }
+input, select { width: 100%; padding: 12px; border-radius: 6px; border: 1px solid #27422b; font-size: 16px; background-color: #1f3523; color: #e2f7e2; box-sizing: border-box; }
+input:focus, select:focus { outline: none; border-color: #4ade80; }
 
 button {
-    background-color: #22c55e;
-    color: #051408;
-    font-size: 16px;
-    font-weight: bold;
-    padding: 12px 24px;
-    border: none;
-    border-radius: 6px;
-    cursor: pointer;
-    transition: all 0.2s ease;
-    margin: 8px;
-    box-shadow: 0 4px 6px rgba(0,0,0,0.3);
+    background-color: #22c55e; color: #051408; font-size: 14px; font-weight: bold;
+    padding: 10px 15px; border: none; border-radius: 6px; cursor: pointer;
+    transition: all 0.2s ease; margin: 5px; box-shadow: 0 4px 6px rgba(0,0,0,0.3);
 }
+button:hover { filter: brightness(1.2); transform: translateY(-2px); }
+button:active { transform: translateY(0); }
+button:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
 
-button:hover {
-    background-color: #4ade80;
-    transform: translateY(-2px);
-}
+.hidden { display: none !important; }
 
-button:active {
-    transform: translateY(0);
-}
-
-.hidden {
-    display: none !important;
-}
-
-.battle-arena {
-    display: flex;
-    justify-content: space-between;
-    margin: 20px 0;
-    gap: 15px;
-}
-
-.char-card {
-    background-color: #1b2e1f;
-    padding: 15px;
-    border-radius: 10px;
-    width: 48%;
-    border: 2px solid #2e4c34;
-    transition: all 0.15s ease-in-out;
-    box-sizing: border-box;
-}
-
-.char-img {
-    width: 120px;
-    height: 120px;
-    border-radius: 50%;
-    object-fit: cover;
-    border: 3px solid #22c55e;
-    margin: 10px auto;
-    display: block;
-    background-color: #0b110c;
-}
-
-#enemy-card .char-img {
-    border-color: #ef4444;
-}
+.battle-arena { display: flex; justify-content: space-between; margin: 20px 0; gap: 15px; }
+.char-card { background-color: #1b2e1f; padding: 15px; border-radius: 10px; width: 48%; border: 2px solid #2e4c34; transition: all 0.15s ease-in-out; box-sizing: border-box; }
+.char-img { width: 120px; height: 120px; border-radius: 50%; object-fit: cover; border: 3px solid #22c55e; margin: 10px auto; display: block; background-color: #0b110c; }
+#enemy-card .char-img { border-color: #ef4444; }
 
 @keyframes hit-flash {
     0% { background-color: #1b2e1f; transform: translateX(0); }
@@ -138,38 +60,23 @@ button:active {
     80% { transform: translateX(2px); }
     100% { background-color: #1b2e1f; transform: translateX(0); }
 }
-
-.damage-blink {
-    animation: hit-flash 0.4s ease-in-out;
-    border-color: #ef4444 !important;
-}
+.damage-blink { animation: hit-flash 0.4s ease-in-out; border-color: #ef4444 !important; }
 
 .bar-container { margin: 10px 0; }
 .bar-text { font-weight: bold; font-size: 13px; margin-bottom: 3px; text-align: left; display: flex; justify-content: space-between; }
 .bar-outer { background-color: #0f1a11; border-radius: 6px; height: 16px; width: 100%; overflow: hidden; border: 1px solid #070c08; }
 .bar-inner-hp { height: 100%; background-color: #22c55e; width: 100%; transition: width 0.3s ease; }
+.bar-inner-mp { height: 100%; background-color: #a855f7; width: 100%; transition: width 0.3s ease; }
 .bar-inner-xp { height: 100%; background-color: #3b82f6; width: 0%; transition: width 0.3s ease; }
 #enemy-card .bar-inner-hp { background-color: #ef4444; }
 
-.log-container {
-    background-color: #070c08;
-    border: 1px solid #1f3523;
-    border-radius: 8px;
-    padding: 12px;
-    height: 130px;
-    overflow-y: auto;
-    text-align: left;
-    font-family: 'Courier New', Courier, monospace;
-    font-size: 13px;
-    margin: 15px 0;
-    line-height: 1.4;
-    color: #a7f3d0;
-}
-
+.log-container { background-color: #070c08; border: 1px solid #1f3523; border-radius: 8px; padding: 12px; height: 130px; overflow-y: auto; text-align: left; font-family: 'Courier New', Courier, monospace; font-size: 13px; margin: 15px 0; line-height: 1.4; color: #a7f3d0; }
 .log-entry { margin-bottom: 4px; border-bottom: 1px solid #111e14; padding-bottom: 2px; }
+
+.battle-actions { display: flex; justify-content: space-between; flex-wrap: wrap; }
+.battle-actions button { flex-grow: 1; }
 
 .shop-section { border-top: 2px dashed #2e4a32; padding-top: 15px; margin-top: 20px; }
 .shop-title { color: #4ade80; margin-bottom: 10px; }
 .shop-items { display: flex; justify-content: center; flex-wrap: wrap; gap: 10px; }
 .shop-btn { background-color: #1f3523; color: #e2f7e2; border: 1px solid #2e4c34; font-size: 13px; padding: 8px 16px; }
-.shop-btn:hover { background-color: #22c55e; border-color: #22c55e; color: #051408; }
