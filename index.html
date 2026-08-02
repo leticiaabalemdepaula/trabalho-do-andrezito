@@ -3,262 +3,23 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>RPG - Floresta Sombria</title>
-    <style>
-        body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background-color: #0d130e; /* Verde escuro pantanoso */
-            color: #d0ebd0;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            padding: 20px;
-            margin: 0;
-            background-image: radial-gradient(circle, #142216 0%, #070a08 100%);
-        }
-
-        h1 {
-            color: #4ade80; /* Verde corrompido */
-            text-shadow: 2px 2px 5px #000;
-            margin-bottom: 5px;
-        }
-
-        .container {
-            background-color: #162218;
-            padding: 25px;
-            border-radius: 12px;
-            box-shadow: 0 10px 25px rgba(0,0,0,0.8);
-            width: 100%;
-            max-width: 720px;
-            text-align: center;
-            border: 1px solid #2e4a32;
-        }
-
-        .ambient-text {
-            color: #86efac;
-            font-style: italic;
-            font-size: 14px;
-            margin-bottom: 20px;
-            background-color: rgba(0,0,0,0.4);
-            padding: 10px;
-            border-radius: 6px;
-            border-left: 3px solid #22c55e;
-        }
-
-        .input-group {
-            margin: 15px 0;
-            text-align: left;
-        }
-
-        label {
-            display: block;
-            margin-bottom: 8px;
-            font-weight: bold;
-            color: #4ade80;
-        }
-
-        input, select {
-            width: 100%;
-            padding: 12px;
-            border-radius: 6px;
-            border: 1px solid #27422b;
-            font-size: 16px;
-            background-color: #1f3523;
-            color: #e2f7e2;
-            box-sizing: border-box;
-        }
-
-        input:focus, select:focus {
-            outline: none;
-            border-color: #4ade80;
-        }
-
-        button {
-            background-color: #22c55e;
-            color: #051408;
-            font-size: 16px;
-            font-weight: bold;
-            padding: 12px 24px;
-            border: none;
-            border-radius: 6px;
-            cursor: pointer;
-            transition: all 0.2s ease;
-            margin: 8px;
-            box-shadow: 0 4px 6px rgba(0,0,0,0.3);
-        }
-
-        button:hover {
-            background-color: #4ade80;
-            transform: translateY(-2px);
-        }
-
-        button:active {
-            transform: translateY(0);
-        }
-
-        .hidden {
-            display: none !important;
-        }
-
-        /* Arena de Batalha */
-        .battle-arena {
-            display: flex;
-            justify-content: space-between;
-            margin: 20px 0;
-            gap: 15px;
-        }
-
-        .char-card {
-            background-color: #1b2e1f;
-            padding: 15px;
-            border-radius: 10px;
-            width: 48%;
-            border: 2px solid #2e4c34;
-            transition: all 0.15s ease-in-out;
-            box-sizing: border-box;
-        }
-
-        .char-img {
-            width: 120px;
-            height: 120px;
-            border-radius: 50%;
-            object-fit: cover;
-            border: 3px solid #22c55e;
-            margin: 10px auto;
-            display: block;
-            background-color: #0b110c;
-        }
-
-        #enemy-card .char-img {
-            border-color: #ef4444;
-        }
-
-        /* Animação de Dano */
-        @keyframes hit-flash {
-            0% { background-color: #1b2e1f; transform: translateX(0); }
-            20% { background-color: #7f1d1d; transform: translateX(-8px); }
-            40% { transform: translateX(6px); }
-            60% { transform: translateX(-4px); }
-            80% { transform: translateX(2px); }
-            100% { background-color: #1b2e1f; transform: translateX(0); }
-        }
-
-        .damage-blink {
-            animation: hit-flash 0.4s ease-in-out;
-            border-color: #ef4444 !important;
-        }
-
-        /* Barras de Vida e Experiência */
-        .bar-container {
-            margin: 10px 0;
-        }
-
-        .bar-text {
-            font-weight: bold;
-            font-size: 13px;
-            margin-bottom: 3px;
-            text-align: left;
-            display: flex;
-            justify-content: space-between;
-        }
-
-        .bar-outer {
-            background-color: #0f1a11;
-            border-radius: 6px;
-            height: 16px;
-            width: 100%;
-            overflow: hidden;
-            border: 1px solid #070c08;
-        }
-
-        .bar-inner-hp {
-            height: 100%;
-            background-color: #22c55e;
-            width: 100%;
-            transition: width 0.3s ease;
-        }
-
-        .bar-inner-xp {
-            height: 100%;
-            background-color: #3b82f6; /* Azul para Experiência */
-            width: 0%;
-            transition: width 0.3s ease;
-        }
-
-        #enemy-card .bar-inner-hp {
-            background-color: #ef4444;
-        }
-
-        /* Diário de Combate */
-        .log-container {
-            background-color: #070c08;
-            border: 1px solid #1f3523;
-            border-radius: 8px;
-            padding: 12px;
-            height: 130px;
-            overflow-y: auto;
-            text-align: left;
-            font-family: 'Courier New', Courier, monospace;
-            font-size: 13px;
-            margin: 15px 0;
-            line-height: 1.4;
-            color: #a7f3d0;
-        }
-
-        .log-entry {
-            margin-bottom: 4px;
-            border-bottom: 1px solid #111e14;
-            padding-bottom: 2px;
-        }
-
-        /* Seção da Loja */
-        .shop-section {
-            border-top: 2px dashed #2e4a32;
-            padding-top: 15px;
-            margin-top: 20px;
-        }
-
-        .shop-title {
-            color: #4ade80;
-            margin-bottom: 10px;
-        }
-
-        .shop-items {
-            display: flex;
-            justify-content: center;
-            flex-wrap: wrap;
-            gap: 10px;
-        }
-
-        .shop-btn {
-            background-color: #1f3523;
-            color: #e2f7e2;
-            border: 1px solid #2e4c34;
-            font-size: 13px;
-            padding: 8px 16px;
-        }
-
-        .shop-btn:hover {
-            background-color: #22c55e;
-            border-color: #22c55e;
-            color: #051408;
-        }
-    </style>
+    <title>RPG - Jornada Épica</title>
+    <link rel="stylesheet" href="style.css">
 </head>
 <body>
 
-    <h1>RPG MEDIEVAL</h1>
+    <h1>Masmorras Dinâmicas RPG</h1>
     
     <div class="container">
         
         <!-- Descrição da Fase Atual -->
-        <div class="ambient-text">
-            <strong>Fase 1: Floresta Sombria</strong> - Uma floresta outrora pacífica, agora completamente corrompida pelas trevas. A mata é tão fechada que a luz do sol mal consegue passar, forçando você a trilhar caminhos estreitos e perigosos repletos de predadores naturais e ameaças corrompidas ocultas nas sombras.
+        <div class="ambient-text" id="ambient-container">
+            <span id="ambient-title">Prepare-se para a jornada...</span>
         </div>
 
         <!-- ================= TELA DE CRIAÇÃO DO PERSONAGEM ================= -->
         <div id="setup-screen">
-            <h2 style="color: #4ade80; margin-top: 0;">Configuração do Personagem</h2>
+            <h2 style="color: #4ade80; margin-top: 0;">Configuração do Herói</h2>
             
             <div class="input-group">
                 <label for="char-name">Nome do seu Herói:</label>
@@ -286,23 +47,19 @@
                     <h3 id="display-name" style="margin: 0 0 5px 0;">Nome</h3>
                     <div id="display-class" style="color: #4ade80; font-size: 13px; font-weight: bold; text-transform: uppercase;">Classe</div>
                     
-                    <!-- Imagem Dinâmica do Jogador -->
                     <img id="player-img" class="char-img" src="" alt="Avatar do Jogador">
                     
-                    <!-- Nível e Status -->
                     <p style="margin: 5px 0; font-weight: bold; color: #60a5fa;">⭐ Nível: <span id="display-level">1</span></p>
                     <p style="margin: 5px 0;">💰 Ouro: <span id="display-gold" style="color: #ffd700; font-weight: bold;">100</span>g</p>
-                    <p style="margin: 5px 0;">⚔️ Dano Atual: <span id="display-damage" style="font-weight: bold;">10</span></p>
+                    <p style="margin: 5px 0;">⚔️ Dano: <span id="display-damage" style="font-weight: bold;">10</span></p>
                     
-                    <!-- Barra de HP -->
+                    <!-- Barras -->
                     <div class="bar-container">
                         <div class="bar-text"><span>HP:</span> <span id="player-hp-text">100/100</span></div>
                         <div class="bar-outer">
                             <div id="player-hp-bar" class="bar-inner-hp"></div>
                         </div>
                     </div>
-
-                    <!-- Barra de XP -->
                     <div class="bar-container">
                         <div class="bar-text"><span>EXP:</span> <span id="player-xp-text">0/100</span></div>
                         <div class="bar-outer">
@@ -316,13 +73,12 @@
                     <h3 id="enemy-name" style="margin: 0 0 5px 0;">Monstro</h3>
                     <div id="enemy-type-badge" style="color: #ef4444; font-size: 13px; font-weight: bold; text-transform: uppercase;">⚠️ Criatura</div>
                     
-                    <!-- Imagem Dinâmica do Inimigo -->
                     <img id="enemy-img" class="char-img" src="" alt="Avatar do Inimigo">
                     
                     <p style="margin: 5px 0;">💀 Dano do Monstro: <span id="enemy-damage-text" style="font-weight: bold;">8</span></p>
-                    <p style="margin: 5px 0; color: #a7f3d0;">Recompensa: <span id="enemy-gold-reward" style="color: #ffd700;">40</span>g | <span id="enemy-xp-reward" style="color: #60a5fa; font-weight: bold;">20 XP</span></p>
+                    <p style="margin: 5px 0; color: #a7f3d0;">Loot: <span id="enemy-gold-reward" style="color: #ffd700;">40</span>g | <span id="enemy-xp-reward" style="color: #60a5fa; font-weight: bold;">20 XP</span></p>
                     
-                    <!-- Barra de HP do Inimigo -->
+                    <!-- Barra Inimigo -->
                     <div class="bar-container">
                         <div class="bar-text"><span>HP:</span> <span id="enemy-hp-text">50/50</span></div>
                         <div class="bar-outer">
@@ -332,399 +88,22 @@
                 </div>
             </div>
 
-            <!-- Diário de Batalha (Logs das rodadas) -->
-            <div id="combat-log" class="log-container">
-                <!-- Logs adicionados via JS -->
-            </div>
+            <div id="combat-log" class="log-container"></div>
 
-            <!-- Controles de Ação de Batalha -->
             <div class="battle-actions">
-                <button onclick="atacar()" style="background-color: #ef4444; color: white; font-size: 18px; width: 45%;">⚔️ ATACAR!</button>
-                <button id="next-enemy-btn" class="hidden" onclick="proximoInimigo()" style="background-color: #22c55e; color: #051408; font-size: 18px; width: 45%;">👣 TRILHAR CAMINHO</button>
+                <button id="btn-atacar" onclick="atacar()" style="background-color: #ef4444; color: white; font-size: 18px; width: 45%;">⚔️ ATACAR!</button>
+                <button id="next-enemy-btn" class="hidden" onclick="proximoInimigo()" style="background-color: #22c55e; color: #051408; font-size: 18px; width: 45%;">👣 AVANÇAR</button>
             </div>
 
-            <!-- Seção de Compra Dinâmica de Itens -->
             <div class="shop-section">
-                <h3 class="shop-title">🏪 Mercado das Sombras</h3>
-                <p style="font-size: 13px; color: #a7f3d0; margin-top: 0;">Encontre melhorias oferecidas por mercadores escondidos nas rotas estreitas:</p>
-                <div id="shop-items" class="shop-items">
-                    <!-- Gerado dinamicamente via JS -->
-                </div>
+                <h3 class="shop-title">🏪 Mercado Mercenário</h3>
+                <div id="shop-items" class="shop-items"></div>
             </div>
 
         </div>
-
     </div>
 
-    <!-- ================= SISTEMA LÓGICO (JAVASCRIPT) ================= -->
-    <script>
-        // --- ESTADO INICIAL DO JOGADOR ---
-        let player = {
-            nome: "",
-            classe: "",
-            hp: 100,
-            maxHp: 100,
-            dano: 10,
-            ouro: 100,
-            nivel: 1,
-            xp: 0,
-            xpNecessario: 100,
-            imagem: ""
-        };
-
-        // --- INIMIGO CORRENTE ---
-        let enemy = {
-            nome: "",
-            categoria: "",
-            hp: 0,
-            maxHp: 0,
-            dano: 0,
-            recompensaOuro: 0,
-            recompensaXp: 0,
-            imagem: ""
-        };
-
-        // --- BANCO DE DADOS DE MONSTROS DA FLORESTA SOMBRIA ---
-        // Adicionados: Lobo Selvagem (comum/não corrompido), Goblin (traiçoeiro) e Esqueleto (morto-vivo).
-        const listaInimigos = [
-            { 
-                nome: "Lobo Selvagem", 
-                categoria: "🍃 Fera Natural",
-                hp: 30, 
-                maxHp: 30, 
-                dano: 5, 
-                recompensaOuro: 15,
-                recompensaXp: 15, // Inimigo básico (pouco XP)
-                imagem: "https://images.unsplash.com/photo-1590424753858-3c6d1b400120?auto=format&fit=crop&w=200&q=80" 
-            },
-            { 
-                nome: "Goblin Saqueador", 
-                categoria: "👺 Goblinóide",
-                hp: 45, 
-                maxHp: 45, 
-                dano: 8, 
-                recompensaOuro: 35,
-                recompensaXp: 28, // Inimigo comum/baixo
-                imagem: "https://images.unsplash.com/photo-1607604276583-eef5d076aa5f?auto=format&fit=crop&w=200&q=80" 
-            },
-            { 
-                nome: "Lobo Infectado", 
-                categoria: "⚠️ Fera Corrompida",
-                hp: 55, 
-                maxHp: 55, 
-                dano: 10, 
-                recompensaOuro: 45,
-                recompensaXp: 40, // Inimigo médio
-                imagem: "https://images.unsplash.com/photo-1590424753858-3c6d1b400120?auto=format&fit=crop&w=200&q=80" 
-            },
-            { 
-                nome: "Esqueleto Reanimado", 
-                categoria: "💀 Morto-Vivo",
-                hp: 70, 
-                maxHp: 70, 
-                dano: 12, 
-                recompensaOuro: 55,
-                recompensaXp: 50, // Inimigo médio-forte
-                imagem: "https://images.unsplash.com/photo-1509248961158-e54f6934749c?auto=format&fit=crop&w=200&q=80" 
-            },
-            { 
-                nome: "Aranha Gigante das Sombras", 
-                categoria: "🕷️ Besta das Trevas",
-                hp: 95, 
-                maxHp: 95, 
-                dano: 15, 
-                recompensaOuro: 80,
-                recompensaXp: 75, // Inimigo forte
-                imagem: "https://images.unsplash.com/photo-1509248961158-e54f6934749c?auto=format&fit=crop&w=200&q=80" 
-            },
-            { 
-                nome: "Espírito Ancestral Corrompido", 
-                categoria: "🔥 Chefe de Fase",
-                hp: 175, 
-                maxHp: 175, 
-                dano: 22, 
-                recompensaOuro: 180,
-                recompensaXp: 135, // Boss (Muito XP!)
-                imagem: "https://images.unsplash.com/photo-1559103444-2453e1be4bf2?auto=format&fit=crop&w=200&q=80" 
-            }
-        ];
-
-        // --- BANCO DE IMAGENS DO JOGADOR ---
-        const imagensClasses = {
-            "Guerreiro": "https://images.unsplash.com/photo-1558591710-4b4a1ae0f04d?auto=format&fit=crop&w=200&q=80", 
-            "Mago": "https://images.unsplash.com/photo-1519074002996-a69e7ac46a42?auto=format&fit=crop&w=200&q=80",      
-            "Arqueiro": "https://images.unsplash.com/photo-1511071353536-40742129525c?auto=format&fit=crop&w=200&q=80"  
-        };
-
-        // --- INICIALIZADOR DO RPG ---
-        function iniciarJogo() {
-            player.nome = document.getElementById("char-name").value.trim() || "Herói Anônimo";
-            player.classe = document.getElementById("char-class").value;
-
-            // Atributos base iniciais por classe
-            if (player.classe === "Guerreiro") {
-                player.maxHp = 130;
-                player.dano = 12;
-            } else if (player.classe === "Mago") {
-                player.maxHp = 80;
-                player.dano = 22;
-            } else if (player.classe === "Arqueiro") {
-                player.maxHp = 100;
-                player.dano = 16;
-            }
-            player.hp = player.maxHp;
-            player.ouro = 100;
-            player.nivel = 1;
-            player.xp = 0;
-            player.xpNecessario = 100;
-            player.imagem = imagensClasses[player.classe];
-
-            // Inicia encarando o Lobo Selvagem (o mais leve para aquecer)
-            definirInimigo(listaInimigos[0]);
-
-            document.getElementById("display-name").innerText = player.nome;
-            document.getElementById("display-class").innerText = "🌲 " + player.classe;
-            document.getElementById("player-img").src = player.imagem;
-
-            atualizarPainelVisual();
-            atualizarPrateleiraLoja();
-
-            document.getElementById("setup-screen").classList.add("hidden");
-            document.getElementById("game-screen").classList.remove("hidden");
-
-            const logBox = document.getElementById("combat-log");
-            logBox.innerHTML = ""; 
-            adicionarAoLog(`🌳 Você adentrou as trilhas estreitas da <strong>Floresta Sombria</strong>.`);
-            adicionarAoLog(`⚔️ O ${player.classe} <strong>${player.nome}</strong> está pronto para combater os perigos!`);
-            adicionarAoLog(`🐾 Um assustador <strong>${enemy.nome}</strong> pula dos arbustos fechados!`);
-        }
-
-        function definirInimigo(dadosInimigo) {
-            enemy.nome = dadosInimigo.nome;
-            enemy.categoria = dadosInimigo.categoria;
-            enemy.hp = dadosInimigo.hp;
-            enemy.maxHp = dadosInimigo.maxHp;
-            enemy.dano = dadosInimigo.dano;
-            enemy.recompensaOuro = dadosInimigo.recompensaOuro;
-            enemy.recompensaXp = dadosInimigo.recompensaXp;
-            enemy.imagem = dadosInimigo.imagem;
-        }
-
-        function atualizarPainelVisual() {
-            // Player HP
-            document.getElementById("display-gold").innerText = player.ouro;
-            document.getElementById("display-damage").innerText = player.dano;
-            document.getElementById("display-level").innerText = player.nivel;
-            document.getElementById("player-hp-text").innerText = `${player.hp}/${player.maxHp}`;
-            
-            const playerPercent = Math.max(0, (player.hp / player.maxHp) * 100);
-            document.getElementById("player-hp-bar").style.width = `${playerPercent}%`;
-
-            // Player XP
-            document.getElementById("player-xp-text").innerText = `${player.xp}/${player.xpNecessario}`;
-            const xpPercent = Math.max(0, (player.xp / player.xpNecessario) * 100);
-            document.getElementById("player-xp-bar").style.width = `${xpPercent}%`;
-
-            // Enemy HP & Info
-            document.getElementById("enemy-name").innerText = enemy.nome;
-            document.getElementById("enemy-type-badge").innerText = enemy.categoria;
-            document.getElementById("enemy-damage-text").innerText = enemy.dano;
-            document.getElementById("enemy-gold-reward").innerText = enemy.recompensaOuro;
-            document.getElementById("enemy-xp-reward").innerText = enemy.recompensaXp;
-            document.getElementById("enemy-img").src = enemy.imagem;
-            document.getElementById("enemy-hp-text").innerText = `${enemy.hp}/${enemy.maxHp}`;
-
-            const enemyPercent = Math.max(0, (enemy.hp / enemy.maxHp) * 100);
-            document.getElementById("enemy-hp-bar").style.width = `${enemyPercent}%`;
-        }
-
-        function adicionarAoLog(mensagem) {
-            const logBox = document.getElementById("combat-log");
-            const novaMensagem = document.createElement("div");
-            novaMensagem.className = "log-entry";
-            novaMensagem.innerHTML = `> ${mensagem}`;
-            logBox.appendChild(novaMensagem);
-            logBox.scrollTop = logBox.scrollHeight;
-        }
-
-        function atualizarPrateleiraLoja() {
-            const containerLoja = document.getElementById("shop-items");
-            containerLoja.innerHTML = ""; 
-
-            let itensParaVender = [];
-
-            if (player.classe === "Guerreiro") {
-                itensParaVender = [
-                    { nome: "🛡️ Cota de Malha (+40 Max HP)", custo: 45, tipo: "hp", valor: 40 },
-                    { nome: "🪓 Cutelo de Aço (+6 Dano)", custo: 55, tipo: "dano", valor: 6 }
-                ];
-            } 
-            else if (player.classe === "Mago") {
-                itensParaVender = [
-                    { nome: "🔮 Cajado do Crepúsculo (+12 Dano)", custo: 65, tipo: "dano", valor: 12 },
-                    { nome: "🧪 Tônico de Vitalidade (+20 Max HP)", custo: 35, tipo: "hp", valor: 20 }
-                ];
-            } 
-            else if (player.classe === "Arqueiro") {
-                itensParaVender = [
-                    { nome: "🏹 Arco de Caça (+9 Dano)", custo: 55, tipo: "dano", valor: 9 },
-                    { nome: "👢 Botas de Couro (+25 Max HP)", custo: 35, tipo: "hp", valor: 25 }
-                ];
-            }
-
-            itensParaVender.forEach(item => {
-                const botao = document.createElement("button");
-                botao.className = "shop-btn";
-                botao.innerHTML = `${item.nome}<br><strong style="color: #ffd700;">${item.custo} Ouro</strong>`;
-                botao.onclick = () => processarCompra(item);
-                containerLoja.appendChild(botao);
-            });
-        }
-
-        function processarCompra(item) {
-            if (player.ouro >= item.custo) {
-                player.ouro -= item.custo;
-                
-                if (item.tipo === "hp") {
-                    player.maxHp += item.valor;
-                    player.hp += item.valor; 
-                    adicionarAoLog(`<span style="color: #4ade80;">Você comprou <strong>${item.nome}</strong> no refúgio seguro!</span>`);
-                } else if (item.tipo === "dano") {
-                    player.dano += item.valor;
-                    adicionarAoLog(`<span style="color: #4ade80;">Você equipou <strong>${item.nome}</strong>! Sente o gume afiado.</span>`);
-                }
-                
-                atualizarPainelVisual();
-                atualizarPrateleiraLoja(); 
-            } else {
-                adicionarAoLog(`<span style="color: #ef4444;">⚠️ Ouro insuficiente para este item!</span>`);
-            }
-        }
-
-        // --- SISTEMA DE COMBATE (TURNO A TURNO) ---
-        function atacar() {
-            if (enemy.hp <= 0) {
-                adicionarAoLog(`A fera foi derrotada! Continue trilhando o caminho.`);
-                return;
-            }
-            if (player.hp <= 0) {
-                adicionarAoLog(`<span style="color: #ef4444;">Você está sem forças! Reinicie a página para ressurgir.</span>`);
-                return;
-            }
-
-            // --- 1) TURNO DO JOGADOR ---
-            enemy.hp -= player.dano;
-            if (enemy.hp < 0) enemy.hp = 0;
-
-            animarDanoCard("enemy-card");
-            adicionarAoLog(`💥 Você golpeou o <strong>${enemy.nome}</strong> causando <span style="color: #ef4444; font-weight: bold;">${player.dano} de dano</span>!`);
-            atualizarPainelVisual();
-
-            // Verifica se o monstro foi derrotado
-            if (enemy.hp <= 0) {
-                adicionarAoLog(`🎉 <strong>Vitória!</strong> O <strong>${enemy.nome}</strong> caiu sem forças!`);
-                adicionarAoLog(`💰 +<span style="color: #ffd700; font-weight: bold;">${enemy.recompensaOuro} ouro</span>.`);
-                adicionarAoLog(`✨ +<span style="color: #60a5fa; font-weight: bold;">${enemy.recompensaXp} de Experiência</span>.`);
-                
-                player.ouro += enemy.recompensaOuro;
-                ganharExperiencia(enemy.recompensaXp);
-                atualizarPainelVisual();
-
-                document.getElementById("next-enemy-btn").classList.remove("hidden");
-                return; 
-            }
-
-            // --- 2) TURNO DO INIMIGO ---
-            setTimeout(() => {
-                if (enemy.hp > 0) {
-                    player.hp -= enemy.dano;
-                    if (player.hp < 0) player.hp = 0;
-
-                    animarDanoCard("player-card");
-                    adicionarAoLog(`🩸 O <strong>${enemy.nome}</strong> contra-atacou desferindo <span style="color: #ef4444; font-weight: bold;">${enemy.dano} de dano</span>!`);
-                    atualizarPainelVisual();
-
-                    if (player.hp <= 0) {
-                        adicionarAoLog(`<span style="color: #ef4444; font-weight: bold;">☠️ FIM DE JOGO! O herói ${player.nome} foi consumido pela escuridão da Floresta Sombria.</span>`);
-                    }
-                }
-            }, 550); 
-        }
-
-        // --- PROGRESSÃO DE EXPERIÊNCIA E LEVEL UP ---
-        function ganarExperiencia(qtd) { // correção de ortografia mantendo compatibilidade
-            ganharExperiencia(qtd);
-        }
-
-        function ganharExperiencia(qtd) {
-            player.xp += qtd;
-            if (player.xp >= player.xpNecessario) {
-                subirDeNivel();
-            }
-        }
-
-        function subirDeNivel() {
-            player.xp -= player.xpNecessario;
-            player.nivel += 1;
-
-            // Escala a dificuldade do próximo nível (precisa de 50% mais XP a cada nível)
-            player.xpNecessario = Math.floor(player.xpNecessario * 1.5);
-
-            // Bônus de Atributos por subir de nível
-            let hpBonus = 0;
-            let danoBonus = 0;
-
-            if (player.classe === "Guerreiro") {
-                hpBonus = 25;
-                danoBonus = 3;
-            } else if (player.classe === "Mago") {
-                hpBonus = 15;
-                danoBonus = 6;
-            } else if (player.classe === "Arqueiro") {
-                hpBonus = 20;
-                danoBonus = 4;
-            }
-
-            player.maxHp += hpBonus;
-            player.dano += danoBonus;
-            player.hp = player.maxHp; // Cura completamente o herói!
-
-            adicionarAoLog(`🌟🌟🌟 <strong>SUBIU DE NÍVEL!</strong> Você alcançou o <strong>Nível ${player.nivel}</strong>! 🌟🌟🌟`);
-            adicionarAoLog(`💖 HP Máximo aumentado em <span style="color: #22c55e;">+${hpBonus}</span> e Dano em <span style="color: #22c55e;">+${danoBonus}</span>. Sua saúde foi restaurada!`);
-            
-            if (player.xp >= player.xpNecessario) {
-                subirDeNivel();
-            }
-        }
-
-        function animarDanoCard(cardId) {
-            const cardElement = document.getElementById(cardId);
-            cardElement.classList.add("damage-blink");
-            setTimeout(() => {
-                cardElement.classList.remove("damage-blink");
-            }, 400);
-        }
-
-        // --- BUSCAR PRÓXIMO MONSTRO / TRILHAR NOVO CAMINHO ---
-        function proximoInimigo() {
-            // Sorteia um monstro aleatoriamente de toda a lista expandida
-            const indiceSorteado = Math.floor(Math.random() * listaInimigos.length);
-            const modeloSorteado = listaInimigos[indiceSorteado];
-
-            definirInimigo(modeloSorteado);
-
-            // Recupera 25% de vida ao descansar temporariamente
-            const curaRecuperada = Math.floor(player.maxHp * 0.25);
-            player.hp = Math.min(player.maxHp, player.hp + curaRecuperada);
-
-            adicionarAoLog(`👣 Você abre caminho com cuidado pela folhagem densa e úmida...`);
-            adicionarAoLog(`💖 Você para um momento para respirar e cura <span style="color: #22c55e;">+${curaRecuperada} HP</span>.`);
-            adicionarAoLog(`🌲 Uma criatura bloqueia a passagem: um <strong>${enemy.nome}</strong> espreita à frente!`);
-
-            atualizarPainelVisual();
-
-            document.getElementById("next-enemy-btn").classList.add("hidden");
-        }
-    </script>
+    <!-- Referência ao script -->
+    <script src="script.js"></script>
 </body>
 </html>
