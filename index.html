@@ -3,21 +3,19 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>RPG - Medieval</title>
+    <title>RPG - Jornada Épica</title>
+    <!-- Chamando o arquivo CSS -->
     <link rel="stylesheet" href="style.css">
-      <link rel="jdk.js" href="jdk.js">
 </head>
 <body>
 
     <h1>Masmorras Dinâmicas RPG</h1>
     
     <div class="container">
-        
         <div class="ambient-text" id="ambient-container">
             <span id="ambient-title">Prepare-se para a jornada...</span>
         </div>
 
-        <!-- ================= TELA DE CRIAÇÃO DO PERSONAGEM ================= -->
         <div id="setup-screen">
             <h2 style="color: #4ade80; margin-top: 0;">Configuração do Herói</h2>
             
@@ -39,15 +37,11 @@
             <button onclick="carregarJogo()" style="background-color: #3b82f6; width: 100%; margin-top: 10px; font-size: 16px;">💾 CARREGAR JOGO SALVO</button>
         </div>
 
-        <!-- ================= TELA ATIVA DE BATALHA ================= -->
         <div id="game-screen" class="hidden">
-            
             <div class="battle-arena">
-                <!-- Painel do Jogador -->
                 <div id="player-card" class="char-card">
                     <h3 id="display-name" style="margin: 0 0 5px 0;">Nome</h3>
                     <div id="display-class" style="color: #4ade80; font-size: 13px; font-weight: bold; text-transform: uppercase;">Classe</div>
-                    
                     <img id="player-img" class="char-img" src="" alt="Avatar">
                     
                     <p style="margin: 5px 0; font-weight: bold; color: #60a5fa;">⭐ Nível: <span id="display-level">1</span></p>
@@ -55,7 +49,6 @@
                     <p style="margin: 5px 0;">⚔️ Dano Base: <span id="display-damage" style="font-weight: bold;">10</span></p>
                     <p style="margin: 5px 0; color: #fb7185; font-weight: bold;">🧪 Poções de Cura: <span id="display-potions">0</span></p>
                     
-                    <!-- Barras HP / MP / XP -->
                     <div class="bar-container">
                         <div class="bar-text"><span>HP:</span> <span id="player-hp-text">100/100</span></div>
                         <div class="bar-outer"><div id="player-hp-bar" class="bar-inner-hp"></div></div>
@@ -70,11 +63,9 @@
                     </div>
                 </div>
 
-                <!-- Painel do Inimigo -->
                 <div id="enemy-card" class="char-card">
                     <h3 id="enemy-name" style="margin: 0 0 5px 0;">Monstro</h3>
                     <div id="enemy-type-badge" style="color: #ef4444; font-size: 13px; font-weight: bold; text-transform: uppercase;">⚠️ Criatura</div>
-                    
                     <img id="enemy-img" class="char-img" src="" alt="Avatar Monstro">
                     
                     <p style="margin: 5px 0;">💀 Dano: <span id="enemy-damage-text" style="font-weight: bold;">8</span></p>
@@ -101,10 +92,10 @@
                 <h3 class="shop-title">🏪 Mercado Mercenário</h3>
                 <div id="shop-items" class="shop-items"></div>
             </div>
-
         </div>
     </div>
 
+    <!-- Chamando o arquivo JavaScript -->
     <script src="script.js"></script>
 </body>
 </html>
