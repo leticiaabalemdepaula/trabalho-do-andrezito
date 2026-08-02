@@ -12,7 +12,6 @@
     
     <div class="container">
         
-        <!-- Descrição da Fase Atual -->
         <div class="ambient-text" id="ambient-container">
             <span id="ambient-title">Prepare-se para a jornada...</span>
         </div>
@@ -29,61 +28,60 @@
             <div class="input-group">
                 <label for="char-class">Selecione sua Classe de Combate:</label>
                 <select id="char-class">
-                    <option value="Guerreiro">🛡️ Guerreiro (Alta Defesa / Vida Extra)</option>
-                    <option value="Mago">🔮 Mago (Poder Arcano / Altíssimo Dano)</option>
-                    <option value="Arqueiro">🏹 Arqueiro (Velocidade / Dano Crítico)</option>
+                    <option value="Guerreiro">🛡️ Guerreiro (Forte / Habilidade: Golpe Devastador)</option>
+                    <option value="Mago">🔮 Mago (Frágil / Habilidade: Explosão Arcana)</option>
+                    <option value="Arqueiro">🏹 Arqueiro (Equilibrado / Habilidade: Chuva de Flechas)</option>
                 </select>
             </div>
             
-            <button onclick="iniciarJogo()" style="width: 100%; margin-top: 10px; font-size: 18px;">COMEÇAR JORNADA</button>
+            <button onclick="iniciarJogo()" style="width: 100%; margin-top: 10px; font-size: 18px;">COMEÇAR NOVA JORNADA</button>
+            <button onclick="carregarJogo()" style="background-color: #3b82f6; width: 100%; margin-top: 10px; font-size: 16px;">💾 CARREGAR JOGO SALVO</button>
         </div>
 
         <!-- ================= TELA ATIVA DE BATALHA ================= -->
         <div id="game-screen" class="hidden">
             
             <div class="battle-arena">
-                <!-- Painel do Jogador (Esquerda) -->
+                <!-- Painel do Jogador -->
                 <div id="player-card" class="char-card">
                     <h3 id="display-name" style="margin: 0 0 5px 0;">Nome</h3>
                     <div id="display-class" style="color: #4ade80; font-size: 13px; font-weight: bold; text-transform: uppercase;">Classe</div>
                     
-                    <img id="player-img" class="char-img" src="" alt="Avatar do Jogador">
+                    <img id="player-img" class="char-img" src="" alt="Avatar">
                     
                     <p style="margin: 5px 0; font-weight: bold; color: #60a5fa;">⭐ Nível: <span id="display-level">1</span></p>
                     <p style="margin: 5px 0;">💰 Ouro: <span id="display-gold" style="color: #ffd700; font-weight: bold;">100</span>g</p>
-                    <p style="margin: 5px 0;">⚔️ Dano: <span id="display-damage" style="font-weight: bold;">10</span></p>
+                    <p style="margin: 5px 0;">⚔️ Dano Base: <span id="display-damage" style="font-weight: bold;">10</span></p>
+                    <p style="margin: 5px 0; color: #fb7185; font-weight: bold;">🧪 Poções de Cura: <span id="display-potions">0</span></p>
                     
-                    <!-- Barras -->
+                    <!-- Barras HP / MP / XP -->
                     <div class="bar-container">
                         <div class="bar-text"><span>HP:</span> <span id="player-hp-text">100/100</span></div>
-                        <div class="bar-outer">
-                            <div id="player-hp-bar" class="bar-inner-hp"></div>
-                        </div>
+                        <div class="bar-outer"><div id="player-hp-bar" class="bar-inner-hp"></div></div>
+                    </div>
+                    <div class="bar-container">
+                        <div class="bar-text"><span>MP (Mana):</span> <span id="player-mp-text">50/50</span></div>
+                        <div class="bar-outer"><div id="player-mp-bar" class="bar-inner-mp"></div></div>
                     </div>
                     <div class="bar-container">
                         <div class="bar-text"><span>EXP:</span> <span id="player-xp-text">0/100</span></div>
-                        <div class="bar-outer">
-                            <div id="player-xp-bar" class="bar-inner-xp"></div>
-                        </div>
+                        <div class="bar-outer"><div id="player-xp-bar" class="bar-inner-xp"></div></div>
                     </div>
                 </div>
 
-                <!-- Painel do Inimigo (Direita) -->
+                <!-- Painel do Inimigo -->
                 <div id="enemy-card" class="char-card">
                     <h3 id="enemy-name" style="margin: 0 0 5px 0;">Monstro</h3>
                     <div id="enemy-type-badge" style="color: #ef4444; font-size: 13px; font-weight: bold; text-transform: uppercase;">⚠️ Criatura</div>
                     
-                    <img id="enemy-img" class="char-img" src="" alt="Avatar do Inimigo">
+                    <img id="enemy-img" class="char-img" src="" alt="Avatar Monstro">
                     
-                    <p style="margin: 5px 0;">💀 Dano do Monstro: <span id="enemy-damage-text" style="font-weight: bold;">8</span></p>
+                    <p style="margin: 5px 0;">💀 Dano: <span id="enemy-damage-text" style="font-weight: bold;">8</span></p>
                     <p style="margin: 5px 0; color: #a7f3d0;">Loot: <span id="enemy-gold-reward" style="color: #ffd700;">40</span>g | <span id="enemy-xp-reward" style="color: #60a5fa; font-weight: bold;">20 XP</span></p>
                     
-                    <!-- Barra Inimigo -->
                     <div class="bar-container">
                         <div class="bar-text"><span>HP:</span> <span id="enemy-hp-text">50/50</span></div>
-                        <div class="bar-outer">
-                            <div id="enemy-hp-bar" class="bar-inner-hp"></div>
-                        </div>
+                        <div class="bar-outer"><div id="enemy-hp-bar" class="bar-inner-hp"></div></div>
                     </div>
                 </div>
             </div>
@@ -91,8 +89,11 @@
             <div id="combat-log" class="log-container"></div>
 
             <div class="battle-actions">
-                <button id="btn-atacar" onclick="atacar()" style="background-color: #ef4444; color: white; font-size: 18px; width: 45%;">⚔️ ATACAR!</button>
-                <button id="next-enemy-btn" class="hidden" onclick="proximoInimigo()" style="background-color: #22c55e; color: #051408; font-size: 18px; width: 45%;">👣 AVANÇAR</button>
+                <button id="btn-atacar" onclick="atacar()" style="background-color: #ef4444; color: white;">⚔️ ATACAR</button>
+                <button id="btn-especial" onclick="atacarEspecial()" style="background-color: #a855f7; color: white;">✨ ESPECIAL (-20 MP)</button>
+                <button id="btn-pocao" onclick="usarPocao()" style="background-color: #fb7185; color: white;">🧪 USAR POÇÃO</button>
+                
+                <button id="next-enemy-btn" class="hidden" onclick="proximoInimigo()" style="background-color: #22c55e; color: #051408; font-size: 18px; width: 100%;">👣 AVANÇAR</button>
             </div>
 
             <div class="shop-section">
@@ -103,7 +104,6 @@
         </div>
     </div>
 
-    <!-- Referência ao script -->
     <script src="script.js"></script>
 </body>
 </html>
